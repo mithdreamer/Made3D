@@ -1,0 +1,234 @@
+[
+  {
+    "id": "modul-desk-organizer",
+    "name": "Modul Masa Organizer",
+    "category": "workspace",
+    "price": 849,
+    "oldPrice": 990,
+    "rating": 4.8,
+    "stock": 18,
+    "material": "PLA+",
+    "finish": "Mat yuzey",
+    "printTime": "9 saat",
+    "leadTime": "2-3 is gunu",
+    "palette": "teal",
+    "shape": "organizer",
+    "featured": true,
+    "tags": ["moduler", "ofis", "masa"],
+    "description": "Kalem, kart, telefon ve kucuk aksesuarlar icin birbirine gecen modullerden olusan duzenleyici set.",
+    "features": [
+      "Moduller tek tek yer degistirilebilir",
+      "Telefon standi ve kablo kanali icerir",
+      "3 farkli renk kombinasyonu secilebilir"
+    ],
+    "specs": {
+      "Olcu": "260 x 120 x 85 mm",
+      "Agirlik": "320 g",
+      "Katman": "0.20 mm",
+      "Doluluk": "%18"
+    }
+  },
+  {
+    "id": "voronoi-lamp-shade",
+    "name": "Voronoi Abajur Basligi",
+    "category": "lighting",
+    "price": 1290,
+    "oldPrice": 1490,
+    "rating": 4.9,
+    "stock": 9,
+    "material": "PETG",
+    "finish": "Yari mat",
+    "printTime": "14 saat",
+    "leadTime": "3-4 is gunu",
+    "palette": "coral",
+    "shape": "lamp",
+    "featured": true,
+    "tags": ["dekor", "lamba", "voronoi"],
+    "description": "Organik Voronoi deseniyle yumusak golgeler ureten, E27 duy uyumlu dekoratif abajur basligi.",
+    "features": [
+      "Isiya daha dayanikli PETG malzeme",
+      "E27 standart duy ile uyumlu",
+      "Desen yogunlugu siparise gore ayarlanabilir"
+    ],
+    "specs": {
+      "Olcu": "180 x 180 x 210 mm",
+      "Agirlik": "410 g",
+      "Katman": "0.18 mm",
+      "Ampul": "LED onerilir"
+    }
+  },
+  {
+    "id": "architectural-model-kit",
+    "name": "Mimari Maket Seti",
+    "category": "architecture",
+    "price": 2450,
+    "oldPrice": 2790,
+    "rating": 4.7,
+    "stock": 6,
+    "material": "PLA",
+    "finish": "Beyaz sunum",
+    "printTime": "28 saat",
+    "leadTime": "5-7 is gunu",
+    "palette": "sand",
+    "shape": "architecture",
+    "featured": true,
+    "tags": ["maket", "sunum", "olcek"],
+    "description": "Konut, ofis veya kampus projeleri icin parcalara ayrilmis, temiz yuzeyli mimari maket uretim seti.",
+    "features": [
+      "Parcali uretim sayesinde kolay boyama",
+      "Taban plakasi ve kitle modelleri dahil",
+      "Olcek ve bina yuksekligi ozellestirilebilir"
+    ],
+    "specs": {
+      "Olcek": "1/200 veya 1/500",
+      "Taban": "300 x 220 mm",
+      "Parca": "12-24 adet",
+      "Teslim": "Montaja hazir"
+    }
+  },
+  {
+    "id": "magnetic-phone-stand",
+    "name": "Manyetik Telefon Standi",
+    "category": "workspace",
+    "price": 590,
+    "oldPrice": 690,
+    "rating": 4.6,
+    "stock": 24,
+    "material": "PLA+ ve miknatis",
+    "finish": "Ipek mat",
+    "printTime": "5 saat",
+    "leadTime": "1-2 is gunu",
+    "palette": "yellow",
+    "shape": "stand",
+    "featured": false,
+    "tags": ["telefon", "stand", "manyetik"],
+    "description": "Masada sabit duran, kablo boslugu bulunan ve manyetik aparatla desteklenen kompakt telefon standi.",
+    "features": [
+      "Dikey ve yatay kullanim",
+      "Sarj kablosu icin arka kanal",
+      "Kaymaz taban pedi dahil"
+    ],
+    "specs": {
+      "Olcu": "95 x 80 x 115 mm",
+      "Agirlik": "145 g",
+      "Aci": "68 derece",
+      "Uyum": "4.7-7 inc telefon"
+    }
+  },
+  {
+    "id": "robotic-prototype-kit",
+    "name": "Robotik Prototip Kiti",
+    "category": "prototype",
+    "price": 1890,
+    "oldPrice": 2150,
+    "rating": 4.8,
+    "stock": 11,
+    "material": "PETG ve TPU",
+    "finish": "Fonksiyonel",
+    "printTime": "22 saat",
+    "leadTime": "4-5 is gunu",
+    "palette": "blue",
+    "shape": "prototype",
+    "featured": true,
+    "tags": ["robotik", "prototip", "mekanik"],
+    "description": "Servo baglanti parcasi, sensor kutusu, motor braketi ve esnek tamponlardan olusan deneme seti.",
+    "features": [
+      "M3 vida ve somun kanallari hazir",
+      "PETG govde, TPU tampon parcalar",
+      "Arduino ve Raspberry Pi projelerine uygun"
+    ],
+    "specs": {
+      "Parca": "18 adet",
+      "Vida": "M3 uyumlu",
+      "Katman": "0.20 mm",
+      "Dayanim": "Orta-yuksek"
+    }
+  },
+  {
+    "id": "wall-mini-shelf",
+    "name": "Duvar Tipi Mini Raf",
+    "category": "workspace",
+    "price": 980,
+    "oldPrice": 1150,
+    "rating": 4.5,
+    "stock": 14,
+    "material": "PLA Wood",
+    "finish": "Ahap dokulu",
+    "printTime": "12 saat",
+    "leadTime": "3 is gunu",
+    "palette": "wood",
+    "shape": "shelf",
+    "featured": false,
+    "tags": ["raf", "duvar", "dekor"],
+    "description": "Anahtar, kulaklik, kucuk bitki veya koleksiyon objeleri icin hafif ve dekoratif mini raf.",
+    "features": [
+      "Gizli vida yatagi",
+      "Ahap dolgulu filament gorunumu",
+      "Tekli veya uclu set olarak kullanilabilir"
+    ],
+    "specs": {
+      "Olcu": "220 x 95 x 80 mm",
+      "Tasima": "2 kg",
+      "Montaj": "2 vida",
+      "Agirlik": "260 g"
+    }
+  },
+  {
+    "id": "personal-nameplate",
+    "name": "Kisisel Isimlik",
+    "category": "personalized",
+    "price": 420,
+    "oldPrice": 520,
+    "rating": 4.9,
+    "stock": 30,
+    "material": "Cift renk PLA",
+    "finish": "Parlak detay",
+    "printTime": "4 saat",
+    "leadTime": "1-2 is gunu",
+    "palette": "violet",
+    "shape": "nameplate",
+    "featured": false,
+    "tags": ["hediye", "isim", "kisisel"],
+    "description": "Masa, oda kapisi veya hediye kutusu icin ad-soyad veya marka yazisi ile uretilebilen isimlik.",
+    "features": [
+      "Metin ve ikon secimi",
+      "Cift renkli baski",
+      "Standli veya yapiskanli teslim"
+    ],
+    "specs": {
+      "Olcu": "180 x 55 mm",
+      "Karakter": "20 karaktere kadar",
+      "Renk": "2 renk",
+      "Taban": "Opsiyonel"
+    }
+  },
+  {
+    "id": "drone-part-pack",
+    "name": "Drone Parca Paketi",
+    "category": "prototype",
+    "price": 720,
+    "oldPrice": 880,
+    "rating": 4.4,
+    "stock": 16,
+    "material": "PETG Carbon",
+    "finish": "Teknik siyah",
+    "printTime": "7 saat",
+    "leadTime": "2-3 is gunu",
+    "palette": "graphite",
+    "shape": "drone",
+    "featured": false,
+    "tags": ["drone", "yedek", "teknik"],
+    "description": "Hafif FPV drone projeleri icin kamera braketi, anten tutucu ve ayak parcalarindan olusan paket.",
+    "features": [
+      "Darbe dayanimli PETG Carbon karisim",
+      "Standart FPV kamera delikleri",
+      "Hafiflestirilmis govde formu"
+    ],
+    "specs": {
+      "Parca": "8 adet",
+      "Agirlik": "95 g",
+      "Vida": "M2/M3",
+      "Renk": "Karbon siyah"
+    }
+  }
+]

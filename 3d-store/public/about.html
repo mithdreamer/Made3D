@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="3D Store hakkinda ve uretim yaklasimi.">
+  <title>Hakkimizda | 3D Store</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Icerige gec</a>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html"><span class="brand-mark">3D</span><span>3D Store<small>Uretime hazir magaza</small></span></a>
+      <nav class="site-nav" data-site-nav aria-label="Ana menu">
+        <a data-nav-link href="index.html">Ana sayfa</a>
+        <a data-nav-link href="products.html">Urunler</a>
+        <a class="active" data-nav-link href="about.html">Hakkimizda</a>
+        <a data-nav-link href="contact.html">Iletisim</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="cart-link" href="cart.html"><span>Sepet</span><span class="cart-count" data-cart-count>0</span></a>
+        <button class="menu-toggle" type="button" data-menu-toggle aria-label="Menuyu ac" aria-expanded="false">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-title">
+      <div class="container">
+        <p class="eyebrow">Hakkimizda</p>
+        <h1>3D baskiyi satilabilir urune ceviren vitrin</h1>
+        <p>Bu proje, hazir 3D baski urunlerini katalog, detay, sepet ve checkout akisi ile Netlify uzerinden yayinlanabilir hale getirir.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container info-grid">
+        <article class="info-panel">
+          <p class="eyebrow">Urun mantigi</p>
+          <h2>Katalog once gelir</h2>
+          <p>Her urun fiyat, malzeme, baski suresi, teslimat ve teknik ozellik alanlariyla tutulur. Boylece yeni urun eklemek JSON verisini genisletmek kadar kolay olur.</p>
+        </article>
+        <article class="info-panel">
+          <p class="eyebrow">Musteri akisi</p>
+          <h2>Basit satin alma</h2>
+          <p>Kullanici urunleri filtreler, detay sayfasinda teknik bilgiyi gorur, sepete ekler ve checkout formu ile demo siparisi olusturur.</p>
+        </article>
+        <article class="info-panel">
+          <p class="eyebrow">Yayin</p>
+          <h2>Statik dagitim</h2>
+          <p>Backend gerektirmeyen bu ilk surum GitHub reposundan Netlify'a dogrudan baglanabilir. Gercek odeme ve siparis API'si daha sonra eklenebilir.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Gelistirme yolu</p>
+            <h2>Sonraki mantikli adimlar</h2>
+          </div>
+        </div>
+        <div class="process-grid">
+          <div class="process-step"><span class="step-number">1</span><b>Admin paneli</b><p>Urun ekleme ve siparis goruntuleme icin basit bir panel.</p></div>
+          <div class="process-step"><span class="step-number">2</span><b>Form entegrasyonu</b><p>Netlify Forms veya serverless function ile gercek teklif kaydi.</p></div>
+          <div class="process-step"><span class="step-number">3</span><b>Odeme</b><p>Iyzico, Stripe veya havale bildirimi ile gercek satis akisi.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div><h3>3D Store</h3><p>3D baski satis vitrini.</p></div>
+        <div><h4>Magaza</h4><a href="products.html">Urunler</a><a href="cart.html">Sepet</a></div>
+        <div><h4>Bilgi</h4><a href="about.html">Hakkimizda</a><a href="contact.html">Iletisim</a></div>
+        <div><h4>Yayin</h4><a href="contact.html">Teklif</a><a href="products.html">Katalog</a></div>
+      </div>
+      <div class="footer-bottom">© <span data-year></span> 3D Store.</div>
+    </div>
+  </footer>
+
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

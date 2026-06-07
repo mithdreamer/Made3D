@@ -1,0 +1,27 @@
+[
+  {
+    "id": "workspace",
+    "name": "Calisma Alani",
+    "description": "Masa duzeni, standlar ve ofis icin moduler 3D baski urunleri."
+  },
+  {
+    "id": "lighting",
+    "name": "Aydinlatma",
+    "description": "Dekoratif abajur, lamba govdesi ve ortam isigina uygun tasarimlar."
+  },
+  {
+    "id": "prototype",
+    "name": "Prototip",
+    "description": "Mekanik, elektronik ve urun gelistirme projeleri icin fonksiyonel parcalar."
+  },
+  {
+    "id": "architecture",
+    "name": "Maket",
+    "description": "Mimari sunum, konsept model ve olcekli parca setleri."
+  },
+  {
+    "id": "personalized",
+    "name": "Kisisel",
+    "description": "Isme, renge ve olcuye gore ozellestirilebilir hediyelik urunler."
+  }
+]

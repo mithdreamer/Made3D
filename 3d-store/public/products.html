@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="3D Store urun katalogu ve filtrelenebilir magaza sayfasi.">
+  <title>Urunler | 3D Store</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/products.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Icerige gec</a>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html"><span class="brand-mark">3D</span><span>3D Store<small>Uretime hazir magaza</small></span></a>
+      <nav class="site-nav" data-site-nav aria-label="Ana menu">
+        <a data-nav-link href="index.html">Ana sayfa</a>
+        <a class="active" data-nav-link href="products.html">Urunler</a>
+        <a data-nav-link href="about.html">Hakkimizda</a>
+        <a data-nav-link href="contact.html">Iletisim</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="cart-link" href="cart.html"><span>Sepet</span><span class="cart-count" data-cart-count>0</span></a>
+        <button class="menu-toggle" type="button" data-menu-toggle aria-label="Menuyu ac" aria-expanded="false">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-title">
+      <div class="container">
+        <p class="eyebrow">Katalog</p>
+        <h1>3D baski urunleri</h1>
+        <p>Hazir urunleri arayabilir, kategoriye gore filtreleyebilir ve sepete ekleyebilirsin.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="toolbar">
+          <label class="search-box">
+            <span class="sr-only">Urun ara</span>
+            <input type="search" data-product-search placeholder="Urun, malzeme veya etiket ara">
+          </label>
+          <select class="sort-select" data-product-sort aria-label="Siralama">
+            <option value="featured">One cikanlar</option>
+            <option value="price-asc">Fiyat artan</option>
+            <option value="price-desc">Fiyat azalan</option>
+            <option value="rating">En yuksek puan</option>
+          </select>
+        </div>
+        <div class="filter-row" data-category-filters></div>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow" data-result-count>0 urun</p>
+            <h2>Sonuclar</h2>
+          </div>
+        </div>
+        <div class="product-grid" data-product-grid>
+          <div class="empty-state"><p>Urunler yukleniyor...</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div><h3>3D Store</h3><p>Filtrelenebilir statik urun katalogu.</p></div>
+        <div><h4>Magaza</h4><a href="products.html">Urunler</a><a href="cart.html">Sepet</a><a href="checkout.html">Checkout</a></div>
+        <div><h4>Bilgi</h4><a href="about.html">Hakkimizda</a><a href="contact.html">Iletisim</a></div>
+        <div><h4>Uretim</h4><a href="products.html">PLA+</a><a href="products.html">PETG</a><a href="products.html">TPU</a></div>
+      </div>
+      <div class="footer-bottom">© <span data-year></span> 3D Store.</div>
+    </div>
+  </footer>
+
+  <script src="../js/app.js" defer></script>
+  <script src="../js/products.js" defer></script>
+</body>
+</html>

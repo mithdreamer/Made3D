@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="3D Store checkout sayfasi.">
+  <title>Checkout | 3D Store</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/products.css">
+  <link rel="stylesheet" href="../css/cart.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Icerige gec</a>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html"><span class="brand-mark">3D</span><span>3D Store<small>Uretime hazir magaza</small></span></a>
+      <nav class="site-nav" data-site-nav aria-label="Ana menu">
+        <a data-nav-link href="index.html">Ana sayfa</a>
+        <a data-nav-link href="products.html">Urunler</a>
+        <a data-nav-link href="about.html">Hakkimizda</a>
+        <a data-nav-link href="contact.html">Iletisim</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="cart-link" href="cart.html"><span>Sepet</span><span class="cart-count" data-cart-count>0</span></a>
+        <button class="menu-toggle" type="button" data-menu-toggle aria-label="Menuyu ac" aria-expanded="false">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-title">
+      <div class="container">
+        <p class="eyebrow">Checkout</p>
+        <h1>Teslimat bilgileri</h1>
+        <p>Bu statik demoda odeme alinmaz; siparis kaydi tarayicinda simule edilir.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container checkout-layout">
+        <form class="checkout-panel" data-checkout-form>
+          <h2>Musteri ve teslimat</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">Ad soyad</label>
+              <input id="name" name="name" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="email">E-posta</label>
+              <input id="email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label for="phone">Telefon</label>
+              <input id="phone" name="phone" autocomplete="tel" required>
+            </div>
+            <div class="field">
+              <label for="city">Sehir</label>
+              <input id="city" name="city" autocomplete="address-level1" required>
+            </div>
+            <div class="field full">
+              <label for="address">Adres</label>
+              <textarea id="address" name="address" autocomplete="street-address" required></textarea>
+            </div>
+            <div class="field full">
+              <label for="note">Siparis notu</label>
+              <textarea id="note" name="note" placeholder="Renk, malzeme veya olcu notu"></textarea>
+            </div>
+          </div>
+          <button class="button full" type="submit" data-checkout-submit>Siparisi olustur</button>
+          <div class="success-box" data-checkout-success>
+            <h2>Siparis olustu</h2>
+            <p>Siparis numaran: <strong data-order-id></strong>. Bu demo kaydi localStorage icine yazildi.</p>
+          </div>
+        </form>
+        <aside class="summary-panel" data-checkout-summary aria-label="Checkout ozeti"></aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">© <span data-year></span> 3D Store.</div>
+    </div>
+  </footer>
+
+  <script src="../js/app.js" defer></script>
+  <script src="../js/checkout.js" defer></script>
+</body>
+</html>

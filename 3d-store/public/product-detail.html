@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="3D Store urun detay sayfasi.">
+  <title>Urun Detay | 3D Store</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/products.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Icerige gec</a>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html"><span class="brand-mark">3D</span><span>3D Store<small>Uretime hazir magaza</small></span></a>
+      <nav class="site-nav" data-site-nav aria-label="Ana menu">
+        <a data-nav-link href="index.html">Ana sayfa</a>
+        <a class="active" data-nav-link href="products.html">Urunler</a>
+        <a data-nav-link href="about.html">Hakkimizda</a>
+        <a data-nav-link href="contact.html">Iletisim</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="cart-link" href="cart.html"><span>Sepet</span><span class="cart-count" data-cart-count>0</span></a>
+        <button class="menu-toggle" type="button" data-menu-toggle aria-label="Menuyu ac" aria-expanded="false">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section">
+      <div class="container" data-product-detail>
+        <div class="empty-state"><p>Urun detayi yukleniyor...</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div><h3>3D Store</h3><p>Urun detaylari, teknik bilgiler ve sepete ekleme akisi.</p></div>
+        <div><h4>Magaza</h4><a href="products.html">Urunler</a><a href="cart.html">Sepet</a><a href="checkout.html">Checkout</a></div>
+        <div><h4>Bilgi</h4><a href="about.html">Hakkimizda</a><a href="contact.html">Iletisim</a></div>
+        <div><h4>Uretim</h4><a href="products.html">Malzemeler</a><a href="contact.html">Teklif al</a></div>
+      </div>
+      <div class="footer-bottom">© <span data-year></span> 3D Store.</div>
+    </div>
+  </footer>
+
+  <script src="../js/app.js" defer></script>
+  <script src="../js/products.js" defer></script>
+</body>
+</html>
