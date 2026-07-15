@@ -95,7 +95,7 @@
 
     document.querySelector("#clearImages")?.addEventListener("click", () => setFormImages([]));
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const data = new FormData(form);
       const saved = Store.upsertProduct({
@@ -113,6 +113,7 @@
         active: data.get("active") === "on",
         images: getFormImages()
       });
+      await Store.syncRemoteCatalog?.();
       Utils.showToast("Ürün kaydedildi.");
       window.location.href = `${Utils.adminPath("edit-product.html")}?id=${saved.id}`;
     });
@@ -125,6 +126,7 @@
     if (!product) return;
     if (!confirm(`${product.name} silinsin mi?`)) return;
     Store.deleteProduct(product.id);
+    Store.syncRemoteCatalog?.();
     renderProductsTable();
     Utils.showToast("Ürün silindi.");
   });

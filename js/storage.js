@@ -11,6 +11,11 @@
 
   const seed = () => window.ECommerceSeed || {};
   const clone = (value) => JSON.parse(JSON.stringify(value));
+  const REMOTE_STORE_URL = "/.netlify/functions/store";
+  const REMOTE_KEYS = new Set([KEYS.settings, KEYS.categories, KEYS.products]);
+  let remoteAvailable = true;
+  let remoteWriteTimer = null;
+  let applyingRemoteState = false;
 
   const paymentDefaults = {
     enabled: true,
@@ -116,8 +121,57 @@
     }
   };
 
-  const write = (key, value) => {
+  const writeLocal = (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
+    return value;
+  };
+
+  const remoteSupported = () =>
+    typeof window.fetch === "function" && window.location.protocol !== "file:" && remoteAvailable;
+
+  const publicSettings = (settings = {}) => {
+    const { adminUsername, adminPassword, ...sharedSettings } = settings || {};
+    return sharedSettings;
+  };
+
+  const catalogSnapshot = () => ({
+    settings: publicSettings(read(KEYS.settings, seed().settings || {})),
+    categories: read(KEYS.categories, seed().categories || []),
+    products: read(KEYS.products, seed().products || [])
+  });
+
+  const persistRemoteCatalog = async () => {
+    if (!remoteSupported()) return;
+
+    try {
+      const response = await fetch(REMOTE_STORE_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(catalogSnapshot())
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      remoteAvailable = false;
+      console.info("Ortak katalog deposuna yazılamadı; yerel kayıt kullanılacak.", error);
+    }
+  };
+
+  const queueRemotePersist = (key) => {
+    if (!REMOTE_KEYS.has(key) || applyingRemoteState || !remoteSupported()) return;
+    window.clearTimeout(remoteWriteTimer);
+    remoteWriteTimer = window.setTimeout(persistRemoteCatalog, 300);
+  };
+
+  const syncRemoteCatalog = async () => {
+    window.clearTimeout(remoteWriteTimer);
+    await persistRemoteCatalog();
+  };
+
+  const write = (key, value) => {
+    writeLocal(key, value);
+    queueRemotePersist(key);
     return value;
   };
 
@@ -140,13 +194,46 @@
 
   const init = () => {
     const data = seed();
-    if (!localStorage.getItem(KEYS.settings)) write(KEYS.settings, data.settings || {});
-    if (!localStorage.getItem(KEYS.paymentSettings)) write(KEYS.paymentSettings, data.paymentSettings || paymentDefaults);
-    if (!localStorage.getItem(KEYS.shippingSettings)) write(KEYS.shippingSettings, data.shippingSettings || shippingDefaults);
-    if (!localStorage.getItem(KEYS.categories)) write(KEYS.categories, data.categories || []);
-    if (!localStorage.getItem(KEYS.products)) write(KEYS.products, data.products || []);
-    if (!localStorage.getItem(KEYS.orders)) write(KEYS.orders, data.orders || []);
-    if (!localStorage.getItem(KEYS.cart)) write(KEYS.cart, []);
+    if (!localStorage.getItem(KEYS.settings)) writeLocal(KEYS.settings, data.settings || {});
+    if (!localStorage.getItem(KEYS.paymentSettings)) writeLocal(KEYS.paymentSettings, data.paymentSettings || paymentDefaults);
+    if (!localStorage.getItem(KEYS.shippingSettings)) writeLocal(KEYS.shippingSettings, data.shippingSettings || shippingDefaults);
+    if (!localStorage.getItem(KEYS.categories)) writeLocal(KEYS.categories, data.categories || []);
+    if (!localStorage.getItem(KEYS.products)) writeLocal(KEYS.products, data.products || []);
+    if (!localStorage.getItem(KEYS.orders)) writeLocal(KEYS.orders, data.orders || []);
+    if (!localStorage.getItem(KEYS.cart)) writeLocal(KEYS.cart, []);
+  };
+
+  const applyRemoteCatalog = (data = {}) => {
+    applyingRemoteState = true;
+    try {
+      if (data.settings && typeof data.settings === "object") {
+        writeLocal(KEYS.settings, {
+          ...read(KEYS.settings, seed().settings || {}),
+          ...publicSettings(data.settings)
+        });
+      }
+      if (Array.isArray(data.categories)) writeLocal(KEYS.categories, data.categories);
+      if (Array.isArray(data.products)) writeLocal(KEYS.products, data.products);
+    } finally {
+      applyingRemoteState = false;
+    }
+  };
+
+  const hydrateRemoteCatalog = async () => {
+    if (!remoteSupported()) return;
+
+    try {
+      const response = await fetch(REMOTE_STORE_URL, { cache: "no-store" });
+      if (response.status === 404) {
+        remoteAvailable = false;
+        return;
+      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      applyRemoteCatalog(await response.json());
+    } catch (error) {
+      remoteAvailable = false;
+      console.info("Ortak katalog deposu okunamadı; yerel veri kullanılacak.", error);
+    }
   };
 
   const getSettings = () => ({ ...(seed().settings || {}), ...read(KEYS.settings, seed().settings || {}) });
@@ -459,6 +546,9 @@
     orders: getOrders()
   });
 
+  init();
+  const ready = hydrateRemoteCatalog();
+
   window.Store = {
     init,
     getSettings,
@@ -493,8 +583,8 @@
     updateOrderShipping,
     resetDemo,
     exportData,
+    ready,
+    syncRemoteCatalog,
     slugify
   };
-
-  init();
 })();

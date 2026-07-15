@@ -5,6 +5,11 @@
 
   const isLoginPage = () => document.body?.dataset.adminPage === "login";
 
+  const loginTarget = () => {
+    const next = Utils.getParam("next");
+    return next && !/\/admin\/?$/.test(next) ? next : "index.html";
+  };
+
   const getCredentials = () => {
     const settings = Store.getSettings();
     return {
@@ -38,7 +43,7 @@
     if (!form) return;
 
     if (isAuthenticated()) {
-      window.location.href = Utils.getParam("next") || "index.html";
+      window.location.href = loginTarget();
       return;
     }
 
@@ -50,7 +55,7 @@
         document.querySelector("#loginError").textContent = "Kullanıcı adı veya şifre hatalı.";
         return;
       }
-      window.location.href = Utils.getParam("next") || "index.html";
+      window.location.href = loginTarget();
     });
   };
 
@@ -60,7 +65,9 @@
   });
 
   requireAuth();
-  document.addEventListener("DOMContentLoaded", bindLoginForm);
+  document.addEventListener("DOMContentLoaded", () => {
+    (Store.ready || Promise.resolve()).then(bindLoginForm);
+  });
 
   window.AdminAuth = {
     isAuthenticated,

@@ -33,6 +33,8 @@
     `;
   };
 
-  document.addEventListener("DOMContentLoaded", renderAdminSidebar);
+  document.addEventListener("DOMContentLoaded", () => {
+    (Store.ready || Promise.resolve()).then(renderAdminSidebar);
+  });
   window.AdminSidebar = { renderAdminSidebar };
 })();

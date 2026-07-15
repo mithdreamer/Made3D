@@ -61,7 +61,7 @@
 
     document.querySelector("#clearAboutImage")?.addEventListener("click", () => setAboutImage(""));
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const data = new FormData(form);
       Store.saveSettings({
@@ -78,12 +78,14 @@
         shippingFee: Number(data.get("shippingFee")) || 0,
         freeShippingThreshold: Number(data.get("freeShippingThreshold")) || 0
       });
+      await Store.syncRemoteCatalog?.();
       Utils.showToast("Ayarlar kaydedildi.");
     });
 
-    document.querySelector("#resetDemo")?.addEventListener("click", () => {
+    document.querySelector("#resetDemo")?.addEventListener("click", async () => {
       if (!confirm("Demo veriler geri yüklensin mi? Mevcut tarayıcı verileri silinir.")) return;
       Store.resetDemo();
+      await Store.syncRemoteCatalog?.();
       window.location.reload();
     });
   };
@@ -113,5 +115,7 @@
     if (page === "shipping-settings") ShippingManager.bindShippingSettings();
   };
 
-  document.addEventListener("DOMContentLoaded", initAdminPage);
+  document.addEventListener("DOMContentLoaded", () => {
+    (Store.ready || Promise.resolve()).then(initAdminPage);
+  });
 })();

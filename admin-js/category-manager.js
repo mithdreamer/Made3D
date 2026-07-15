@@ -42,7 +42,7 @@
     const form = document.querySelector("#categoryForm");
     if (!form) return;
     resetForm();
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const data = new FormData(form);
       Store.upsertCategory({
@@ -51,6 +51,7 @@
         description: data.get("description"),
         active: data.get("active") === "on"
       });
+      await Store.syncRemoteCatalog?.();
       renderCategories();
       resetForm();
       Utils.showToast("Kategori kaydedildi.");
@@ -78,6 +79,7 @@
       try {
         if (!confirm("Kategori silinsin mi?")) return;
         Store.deleteCategory(remove.dataset.deleteCategory);
+        Store.syncRemoteCatalog?.();
         renderCategories();
         Utils.showToast("Kategori silindi.");
       } catch (error) {

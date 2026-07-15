@@ -38,6 +38,8 @@
     window.Cart?.updateCounters();
   };
 
-  document.addEventListener("DOMContentLoaded", renderNavbar);
+  document.addEventListener("DOMContentLoaded", () => {
+    (Store.ready || Promise.resolve()).then(renderNavbar);
+  });
   window.Navbar = { renderNavbar };
 })();

@@ -1,4 +1,7 @@
 (function () {
+  const UPLOAD_URL = "/.netlify/functions/upload-image";
+  let remoteUploadsAvailable = true;
+
   const resizeImage = (file, maxSize = 1200, quality = 0.84) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -20,9 +23,36 @@
       reader.readAsDataURL(file);
     });
 
+  const uploadRemoteImage = async (image) => {
+    if (!remoteUploadsAvailable || window.location.protocol === "file:") return image;
+
+    try {
+      const response = await fetch(UPLOAD_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ image })
+      });
+      if (response.status === 404) {
+        remoteUploadsAvailable = false;
+        return image;
+      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      return result.src || image;
+    } catch (error) {
+      remoteUploadsAvailable = false;
+      console.info("Ortak görsel deposuna yüklenemedi; yerel görsel kullanılacak.", error);
+      return image;
+    }
+  };
+
   const filesToImages = async (files) => {
     const imageFiles = Array.from(files || []).filter((file) => file.type.startsWith("image/"));
-    return Promise.all(imageFiles.slice(0, 6).map((file) => resizeImage(file)));
+    return Promise.all(
+      imageFiles.slice(0, 6).map(async (file) => uploadRemoteImage(await resizeImage(file)))
+    );
   };
 
   const renderPreview = (container, images) => {

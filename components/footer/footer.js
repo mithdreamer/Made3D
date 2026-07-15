@@ -48,6 +48,8 @@
     `;
   };
 
-  document.addEventListener("DOMContentLoaded", renderFooter);
+  document.addEventListener("DOMContentLoaded", () => {
+    (Store.ready || Promise.resolve()).then(renderFooter);
+  });
   window.Footer = { renderFooter };
 })();

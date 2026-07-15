@@ -51,5 +51,7 @@
     bindContactForm();
   };
 
-  document.addEventListener("DOMContentLoaded", initPublicPage);
+  document.addEventListener("DOMContentLoaded", () => {
+    (Store.ready || Promise.resolve()).then(initPublicPage);
+  });
 })();
