@@ -1,0 +1,129 @@
+.form-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field label {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--color-ink);
+}
+
+.field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--color-primary);
+  outline: 3px solid rgba(23, 107, 95, 0.16);
+}
+
+.field-inline {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.field-inline input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.option-group {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.choice-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+  min-height: 42px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  cursor: pointer;
+}
+
+.choice-row input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.choice-row:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-surface-soft);
+}
+
+.filter-bar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 220px 180px;
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.65rem;
+}
+
+.image-preview-grid img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--color-surface-soft);
+}
+
+.single-image-preview {
+  grid-template-columns: minmax(180px, 320px);
+}
+
+.single-image-preview img {
+  aspect-ratio: 16 / 10;
+}
+
+@media (max-width: 760px) {
+  .form-grid,
+  .filter-bar {
+    grid-template-columns: 1fr;
+  }
+}

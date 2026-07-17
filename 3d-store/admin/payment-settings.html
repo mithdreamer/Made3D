@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ödeme Ayarları | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/admin-sidebar/admin-sidebar.css">
+  </head>
+  <body class="admin-body" data-admin-page="payment-settings">
+    <div class="admin-shell">
+      <div data-component="admin-sidebar"></div>
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <span class="badge">Ödeme altyapısı</span>
+            <h1>Ödeme Ayarları</h1>
+          </div>
+          <a class="btn btn-outline" href="settings.html">MAde3D ayarları</a>
+        </header>
+
+        <form class="stack" id="paymentSettingsForm">
+          <div class="form-grid">
+            <section class="settings-panel stack-sm">
+              <h2>Sağlayıcı</h2>
+              <div class="field">
+                <label for="activeProvider">Ödeme sağlayıcısı</label>
+                <select id="activeProvider" name="activeProvider">
+                  <option value="iyzico">İyzico</option>
+                  <option value="paytr">PayTR</option>
+                  <option value="shopier">Shopier</option>
+                  <option value="manual">Manuel ödeme</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="mode">Çalışma modu</label>
+                <select id="mode" name="mode">
+                  <option value="test">Test</option>
+                  <option value="live">Canlı</option>
+                </select>
+              </div>
+              <div class="field-inline">
+                <input id="paymentEnabled" name="paymentEnabled" type="checkbox">
+                <label for="paymentEnabled">Ödeme adımını aktif tut</label>
+              </div>
+            </section>
+
+            <section class="settings-panel stack-sm">
+              <h2>Ödeme yöntemleri</h2>
+              <div class="field-inline">
+                <input id="creditCard" name="creditCard" type="checkbox">
+                <label for="creditCard">Kredi kartı</label>
+              </div>
+              <div class="field-inline">
+                <input id="bankTransfer" name="bankTransfer" type="checkbox">
+                <label for="bankTransfer">Havale/EFT</label>
+              </div>
+              <div class="field-inline">
+                <input id="cashOnDelivery" name="cashOnDelivery" type="checkbox">
+                <label for="cashOnDelivery">Kapıda ödeme</label>
+              </div>
+              <div class="field-inline">
+                <input id="installmentsEnabled" name="installmentsEnabled" type="checkbox">
+                <label for="installmentsEnabled">Taksit seçeneği</label>
+              </div>
+              <div class="field-inline">
+                <input id="cardStorageEnabled" name="cardStorageEnabled" type="checkbox">
+                <label for="cardStorageEnabled">Kart saklama hazırlığı</label>
+              </div>
+            </section>
+
+            <section class="settings-panel stack-sm full-span">
+              <h2>Entegrasyon bilgileri</h2>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="merchantId">Mağaza / Merchant ID</label>
+                  <input id="merchantId" name="merchantId" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label for="apiKey">API anahtarı</label>
+                  <input id="apiKey" name="apiKey" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label for="secretKey">Gizli anahtar</label>
+                  <input id="secretKey" name="secretKey" type="password" autocomplete="new-password">
+                </div>
+                <div class="field">
+                  <label for="callbackUrl">Callback adresi</label>
+                  <input id="callbackUrl" name="callbackUrl" placeholder="https://siteadresi.com/payment-callback">
+                </div>
+                <div class="field">
+                  <label for="maxInstallmentCount">Maksimum taksit</label>
+                  <input id="maxInstallmentCount" name="maxInstallmentCount" type="number" min="1" max="12">
+                </div>
+                <div class="field">
+                  <label for="minInstallmentAmount">Taksit alt limiti</label>
+                  <input id="minInstallmentAmount" name="minInstallmentAmount" type="number" min="0">
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-panel stack-sm full-span">
+              <h2>Havale/EFT bilgileri</h2>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="bankName">Banka adı</label>
+                  <input id="bankName" name="bankName">
+                </div>
+                <div class="field">
+                  <label for="accountHolder">Hesap sahibi</label>
+                  <input id="accountHolder" name="accountHolder">
+                </div>
+                <div class="field full-span">
+                  <label for="iban">IBAN</label>
+                  <input id="iban" name="iban">
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="cluster">
+            <button class="btn btn-primary" type="submit">Ödeme ayarlarını kaydet</button>
+            <button class="btn btn-outline" type="button" id="resetPaymentSettings">Varsayılanlara dön</button>
+          </div>
+        </form>
+
+        <section class="page-block">
+          <div class="section-title">
+            <div>
+              <h2>Sağlayıcı durumu</h2>
+              <p class="muted">İlk sürümde kayıtlar yerel veride tutulur; gerçek sanal POS V2 entegrasyonunda bağlanır.</p>
+            </div>
+          </div>
+          <div class="admin-grid" id="paymentProviderCards"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../admin-js/auth.js"></script>
+    <script src="../components/admin-sidebar/admin-sidebar.js"></script>
+    <script src="../admin-js/payment-manager.js"></script>
+    <script src="../admin-js/admin-app.js"></script>
+  </body>
+</html>

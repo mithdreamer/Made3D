@@ -1,213 +1,131 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const featuredGrid = document.querySelector("[data-featured-products]");
-  const productGrid = document.querySelector("[data-product-grid]");
-  const detailRoot = document.querySelector("[data-product-detail]");
-
-  if (!featuredGrid && !productGrid && !detailRoot) return;
-
-  try {
-    const [products, categories] = await Promise.all([
-      Store.loadJson("../data/products.json"),
-      Store.loadJson("../data/categories.json")
-    ]);
-
-    const categoryMap = new Map(categories.map((category) => [category.id, category.name]));
-
-    if (featuredGrid) {
-      renderProductCards(featuredGrid, products.filter((product) => product.featured).slice(0, 4), categoryMap);
-    }
-
-    if (productGrid) {
-      initProductsPage(products, categories, categoryMap);
-    }
-
-    if (detailRoot) {
-      renderDetailPage(detailRoot, products, categoryMap);
-    }
-  } catch (error) {
-    const target = featuredGrid || productGrid || detailRoot;
-    target.innerHTML = `
-      <div class="empty-state">
-        <h2>Urunler yuklenemedi</h2>
-        <p>Yerel sunucuyu proje klasorunden calistirdigindan emin ol.</p>
-      </div>
-    `;
-    console.error(error);
-  }
-});
-
-function initProductsPage(products, categories, categoryMap) {
-  const grid = document.querySelector("[data-product-grid]");
-  const search = document.querySelector("[data-product-search]");
-  const sort = document.querySelector("[data-product-sort]");
-  const filters = document.querySelector("[data-category-filters]");
-  const resultCount = document.querySelector("[data-result-count]");
-  const state = {
-    category: "all",
-    search: "",
-    sort: "featured"
+(function () {
+  const sortProducts = (products, sortBy) => {
+    const sorted = [...products];
+    if (sortBy === "price-asc") sorted.sort((a, b) => a.price - b.price);
+    if (sortBy === "price-desc") sorted.sort((a, b) => b.price - a.price);
+    if (sortBy === "name") sorted.sort((a, b) => a.name.localeCompare(b.name, "tr"));
+    if (sortBy === "newest") sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return sorted;
   };
 
-  filters.innerHTML = [
-    `<button class="filter-button active" type="button" data-category="all">Tum urunler</button>`,
-    ...categories.map((category) => (
-      `<button class="filter-button" type="button" data-category="${category.id}">${category.name}</button>`
-    ))
-  ].join("");
+  const renderHome = () => {
+    const featured = document.querySelector("#featuredProducts");
+    const stats = document.querySelector("#homeStats");
+    if (featured) {
+      const products = Store.getProducts().filter((product) => product.featured).slice(0, 4);
+      featured.innerHTML = products.map(ProductCard.render).join("");
+    }
+    if (stats) {
+      const products = Store.getProducts();
+      const categories = Store.getCategories();
+      stats.innerHTML = `
+        <div class="admin-card metric"><span class="muted">Aktif ürün</span><strong>${products.length}</strong></div>
+        <div class="admin-card metric"><span class="muted">Kategori</span><strong>${categories.length}</strong></div>
+        <div class="admin-card metric"><span class="muted">Demo sipariş</span><strong>${Store.getOrders().length}</strong></div>
+      `;
+    }
+    Categories.renderCategoryTiles("#homeCategories");
+  };
 
-  function applyFilters() {
-    const term = state.search.trim().toLocaleLowerCase("tr-TR");
-    let visible = products.filter((product) => {
-      const matchesCategory = state.category === "all" || product.category === state.category;
-      const text = `${product.name} ${product.description} ${product.tags.join(" ")}`.toLocaleLowerCase("tr-TR");
-      return matchesCategory && (!term || text.includes(term));
-    });
+  const renderProductsPage = () => {
+    const grid = document.querySelector("#productGrid");
+    const categoryFilter = document.querySelector("#categoryFilter");
+    const search = document.querySelector("#productSearch");
+    const sort = document.querySelector("#sortFilter");
+    const resultCount = document.querySelector("#resultCount");
+    if (!grid || !categoryFilter || !search || !sort) return;
 
-    visible = visible.sort((a, b) => {
-      if (state.sort === "price-asc") return a.price - b.price;
-      if (state.sort === "price-desc") return b.price - a.price;
-      if (state.sort === "rating") return b.rating - a.rating;
-      return Number(b.featured) - Number(a.featured) || b.rating - a.rating;
-    });
-
-    resultCount.textContent = `${visible.length} urun`;
-    renderProductCards(grid, visible, categoryMap);
-  }
-
-  filters.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-category]");
-    if (!button) return;
-
-    state.category = button.dataset.category;
-    filters.querySelectorAll(".filter-button").forEach((item) => item.classList.remove("active"));
-    button.classList.add("active");
-    applyFilters();
-  });
-
-  search.addEventListener("input", () => {
-    state.search = search.value;
-    applyFilters();
-  });
-
-  sort.addEventListener("change", () => {
-    state.sort = sort.value;
-    applyFilters();
-  });
-
-  applyFilters();
-}
-
-function renderProductCards(root, products, categoryMap) {
-  if (!products.length) {
-    root.innerHTML = `
-      <div class="empty-state">
-        <h2>Uygun urun bulunamadi</h2>
-        <p>Filtreleri degistirerek tekrar dene.</p>
-      </div>
+    const selectedCategory = Utils.getParam("category") || "all";
+    categoryFilter.innerHTML = `
+      <option value="all">Tüm kategoriler</option>
+      ${Store.getCategories()
+        .map((category) => `<option value="${category.id}">${Utils.escapeHTML(category.name)}</option>`)
+        .join("")}
     `;
-    return;
-  }
+    categoryFilter.value = selectedCategory;
 
-  root.innerHTML = products.map((product) => productCard(product, categoryMap)).join("");
+    const render = () => {
+      const query = search.value.trim().toLocaleLowerCase("tr-TR");
+      let products = Store.getProducts().filter((product) => {
+        const matchesCategory = categoryFilter.value === "all" || product.categoryId === categoryFilter.value;
+        const matchesSearch =
+          !query ||
+          product.name.toLocaleLowerCase("tr-TR").includes(query) ||
+          product.shortDescription.toLocaleLowerCase("tr-TR").includes(query) ||
+          product.sku.toLocaleLowerCase("tr-TR").includes(query);
+        return matchesCategory && matchesSearch;
+      });
+      products = sortProducts(products, sort.value);
+      resultCount.textContent = `${products.length} ürün`;
+      grid.innerHTML = products.length
+        ? products.map(ProductCard.render).join("")
+        : `<div class="empty-state full-span"><h2>Ürün bulunamadı</h2><p class="muted">Filtreleri temizleyerek tekrar deneyin.</p></div>`;
+    };
 
-  root.querySelectorAll("[data-add-product]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const product = products.find((item) => item.id === button.dataset.addProduct);
-      Store.addToCart(product);
-    });
-  });
-}
+    [categoryFilter, search, sort].forEach((input) => input.addEventListener("input", render));
+    render();
+  };
 
-function productCard(product, categoryMap) {
-  return `
-    <article class="product-card">
-      <a class="product-link" href="product-detail.html?id=${encodeURIComponent(product.id)}" aria-label="${product.name} detay">
-        ${Store.productVisual(product)}
-      </a>
-      <div class="product-body">
-        <span class="product-kicker">${categoryMap.get(product.category) || "3D Baski"}</span>
-        <h3><a href="product-detail.html?id=${encodeURIComponent(product.id)}">${product.name}</a></h3>
-        <p>${product.description}</p>
-        <div class="product-foot">
-          <div>
-            <span class="price">${Store.formatCurrency(product.price)}</span>
-            <span class="old-price">${Store.formatCurrency(product.oldPrice)}</span>
-          </div>
-          <button class="mini-add" type="button" data-add-product="${product.id}" aria-label="${product.name} sepete ekle">+</button>
+  const renderDetailPage = () => {
+    const container = document.querySelector("#productDetail");
+    if (!container) return;
+
+    const slug = Utils.getParam("slug") || Utils.getParam("id");
+    const product = Store.getProductBySlug(slug);
+    if (!product) {
+      container.innerHTML = `
+        <div class="empty-state full-span">
+          <h1>Ürün bulunamadı</h1>
+          <p class="muted">Aradığınız ürün yayından kaldırılmış olabilir.</p>
+          <a class="btn btn-primary" href="${Utils.pagePath("products.html")}">Ürünlere dön</a>
+        </div>
+      `;
+      return;
+    }
+
+    const images = product.images?.length ? product.images.map(Utils.imageUrl) : [Utils.getImage(product)];
+    container.innerHTML = `
+      <div class="product-gallery">
+        <img class="product-main-image" src="${images[0]}" alt="${Utils.escapeHTML(product.name)}" data-main-product-image>
+        <div class="thumb-row">
+          ${images
+            .map(
+              (src, index) => `
+                <img class="${index === 0 ? "is-active" : ""}" src="${src}" alt="${Utils.escapeHTML(product.name)} görsel ${index + 1}" data-product-thumb>
+              `
+            )
+            .join("")}
         </div>
       </div>
-    </article>
-  `;
-}
-
-function renderDetailPage(root, products, categoryMap) {
-  const params = new URLSearchParams(window.location.search);
-  const requestedId = params.get("id") || products[0].id;
-  const product = products.find((item) => item.id === requestedId) || products[0];
-  const related = products
-    .filter((item) => item.category === product.category && item.id !== product.id)
-    .slice(0, 4);
-
-  document.title = `${product.name} | 3D Store`;
-
-  root.innerHTML = `
-    <div class="detail-layout">
-      <div class="detail-media">
-        ${Store.productVisual(product)}
-      </div>
-      <div class="detail-content">
-        <p class="eyebrow">${categoryMap.get(product.category) || "3D Baski"}</p>
-        <h1>${product.name}</h1>
-        <p class="lead">${product.description}</p>
-        <div class="detail-meta">
-          <span class="pill">${product.material}</span>
-          <span class="pill">${product.finish}</span>
-          <span class="pill">${product.printTime} baski</span>
-          <span class="pill">${product.leadTime} teslim</span>
-          <span class="pill">${product.rating} puan</span>
+      <section class="stack">
+        <span class="badge">${Utils.escapeHTML(Utils.getCategoryName(product.categoryId))}</span>
+        <h1>${Utils.escapeHTML(product.name)}</h1>
+        <p class="muted">${Utils.escapeHTML(product.shortDescription)}</p>
+        <div class="cluster">
+          <strong class="price" style="font-size:1.7rem">${Utils.money(product.price)}</strong>
+          ${product.oldPrice > product.price ? `<span class="old-price">${Utils.money(product.oldPrice)}</span>` : ""}
+          <span class="badge">${product.stock > 0 ? `${product.stock} stok` : "Stok yok"}</span>
         </div>
-        <div class="buy-panel">
-          <div>
-            <span class="price">${Store.formatCurrency(product.price)}</span>
-            <span class="old-price">${Store.formatCurrency(product.oldPrice)}</span>
-          </div>
-          <div class="qty-row">
-            <label for="detail-quantity">Adet</label>
-            <input id="detail-quantity" type="number" min="1" max="${product.stock}" value="1">
-            <button class="button" type="button" data-detail-add="${product.id}">Sepete ekle</button>
-          </div>
-          <small>Stok: ${product.stock} adet. 1500 TL ve uzeri siparislerde kargo ucretsiz.</small>
+        <p>${Utils.escapeHTML(product.description || "")}</p>
+        <div class="cluster">
+          <button class="btn btn-primary" type="button" data-add-to-cart="${product.id}" ${product.stock <= 0 ? "disabled" : ""}>Sepete ekle</button>
+          <a class="btn btn-outline" href="${Utils.pagePath("products.html")}">Alışverişe devam et</a>
         </div>
-        <h2>Ozellikler</h2>
-        <ul class="feature-list">
-          ${product.features.map((feature) => `<li>${feature}</li>`).join("")}
-        </ul>
-        <h2>Teknik bilgiler</h2>
-        <ul class="spec-list">
-          ${Object.entries(product.specs).map(([key, value]) => `<li><span>${key}</span><strong>${value}</strong></li>`).join("")}
-        </ul>
-      </div>
-    </div>
-    ${related.length ? `
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Benzer urunler</p>
-            <h2>Ayni kategoriden secimler</h2>
-          </div>
-        </div>
-        <div class="product-grid" data-related-grid></div>
       </section>
-    ` : ""}
-  `;
+    `;
 
-  root.querySelector("[data-detail-add]").addEventListener("click", () => {
-    const quantity = root.querySelector("#detail-quantity").value;
-    Store.addToCart(product, quantity);
-  });
+    container.querySelectorAll("[data-product-thumb]").forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        container.querySelector("[data-main-product-image]").src = thumb.src;
+        container.querySelectorAll("[data-product-thumb]").forEach((item) => item.classList.remove("is-active"));
+        thumb.classList.add("is-active");
+      });
+    });
+  };
 
-  const relatedGrid = root.querySelector("[data-related-grid]");
-  if (relatedGrid) {
-    renderProductCards(relatedGrid, related, categoryMap);
-  }
-}
+  window.Products = {
+    renderHome,
+    renderProductsPage,
+    renderDetailPage
+  };
+})();

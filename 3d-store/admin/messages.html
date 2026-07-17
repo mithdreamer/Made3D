@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mesajlar | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/admin-sidebar/admin-sidebar.css">
+  </head>
+  <body class="admin-body" data-admin-page="messages">
+    <div class="admin-shell">
+      <div data-component="admin-sidebar"></div>
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <span class="badge">İletişim</span>
+            <h1>Mesajlar</h1>
+          </div>
+        </header>
+        <section class="page-block">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tarih</th>
+                  <th>Gönderen</th>
+                  <th>E-posta</th>
+                  <th>Mesaj</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="messagesTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../admin-js/auth.js"></script>
+    <script src="../components/admin-sidebar/admin-sidebar.js"></script>
+    <script src="../admin-js/messages-manager.js"></script>
+    <script src="../admin-js/admin-app.js"></script>
+  </body>
+</html>

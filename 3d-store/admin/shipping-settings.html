@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kargo Ayarları | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/admin-sidebar/admin-sidebar.css">
+  </head>
+  <body class="admin-body" data-admin-page="shipping-settings">
+    <div class="admin-shell">
+      <div data-component="admin-sidebar"></div>
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <span class="badge">Kargo altyapısı</span>
+            <h1>Kargo Ayarları</h1>
+          </div>
+          <a class="btn btn-outline" href="orders.html">Siparişler</a>
+        </header>
+
+        <form class="stack" id="shippingSettingsForm">
+          <div class="form-grid">
+            <section class="settings-panel stack-sm">
+              <h2>Kargo modu</h2>
+              <fieldset class="option-group" aria-labelledby="shippingModeLegend">
+                <legend id="shippingModeLegend" class="sr-only">Kargo modu</legend>
+                <label class="choice-row" for="shippingModeManual">
+                  <input id="shippingModeManual" name="shippingMode" type="radio" value="manual">
+                  <span>Manuel takip no</span>
+                </label>
+                <label class="choice-row" for="shippingModeOwnContract">
+                  <input id="shippingModeOwnContract" name="shippingMode" type="radio" value="own-contract">
+                  <span>Kendi kargo anlaşmamı kullan</span>
+                </label>
+                <label class="choice-row" for="shippingModePlatform">
+                  <input id="shippingModePlatform" name="shippingMode" type="radio" value="platform-integration">
+                  <span>Platform kargo entegrasyonu</span>
+                </label>
+              </fieldset>
+              <div class="field-inline">
+                <input id="trackingRequired" name="trackingRequired" type="checkbox">
+                <label for="trackingRequired">Kargoda durumunda takip no iste</label>
+              </div>
+              <div class="field-inline">
+                <input id="customerTrackingVisible" name="customerTrackingVisible" type="checkbox">
+                <label for="customerTrackingVisible">Müşteri tarafında takip no göster</label>
+              </div>
+            </section>
+
+            <section class="settings-panel stack-sm">
+              <h2>Kargo firması</h2>
+              <fieldset class="option-group" aria-labelledby="defaultCarrierLegend">
+                <legend id="defaultCarrierLegend" class="sr-only">Kargo firması</legend>
+                <label class="choice-row" for="carrierYurtici">
+                  <input id="carrierYurtici" name="defaultCarrier" type="radio" value="yurtici">
+                  <span>Yurtiçi</span>
+                </label>
+                <label class="choice-row" for="carrierAras">
+                  <input id="carrierAras" name="defaultCarrier" type="radio" value="aras">
+                  <span>Aras</span>
+                </label>
+                <label class="choice-row" for="carrierMng">
+                  <input id="carrierMng" name="defaultCarrier" type="radio" value="mng">
+                  <span>MNG / DHL eCommerce</span>
+                </label>
+                <label class="choice-row" for="carrierPtt">
+                  <input id="carrierPtt" name="defaultCarrier" type="radio" value="ptt">
+                  <span>PTT</span>
+                </label>
+                <label class="choice-row" for="carrierUps">
+                  <input id="carrierUps" name="defaultCarrier" type="radio" value="ups">
+                  <span>UPS</span>
+                </label>
+                <label class="choice-row" for="carrierOther">
+                  <input id="carrierOther" name="defaultCarrier" type="radio" value="other">
+                  <span>Diğer</span>
+                </label>
+              </fieldset>
+            </section>
+
+            <section class="settings-panel stack-sm">
+              <h2>Kargo ücreti</h2>
+              <div class="field">
+                <label for="shippingFee">Sabit kargo ücreti</label>
+                <input id="shippingFee" name="shippingFee" type="number" min="0">
+              </div>
+              <div class="field">
+                <label for="freeShippingThreshold">Ücretsiz kargo limiti</label>
+                <input id="freeShippingThreshold" name="freeShippingThreshold" type="number" min="0">
+              </div>
+              <div class="field">
+                <label for="defaultDesi">Varsayılan desi</label>
+                <input id="defaultDesi" name="defaultDesi" type="number" min="0" step="0.1">
+              </div>
+              <div class="field">
+                <label for="labelFormat">Etiket formatı</label>
+                <select id="labelFormat" name="labelFormat">
+                  <option value="a4">A4</option>
+                  <option value="thermal">Termal etiket</option>
+                </select>
+              </div>
+            </section>
+
+            <section class="settings-panel stack-sm full-span">
+              <h2>Entegrasyon bilgileri</h2>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="apiUsername">API kullanıcı adı</label>
+                  <input id="apiUsername" name="apiUsername" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label for="apiPasswordToken">API şifre / token</label>
+                  <input id="apiPasswordToken" name="apiPasswordToken" type="password" autocomplete="new-password">
+                </div>
+                <div class="field">
+                  <label for="customerCode">Müşteri kodu</label>
+                  <input id="customerCode" name="customerCode" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label for="branchCode">Şube kodu</label>
+                  <input id="branchCode" name="branchCode" autocomplete="off">
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-panel stack-sm full-span">
+              <h2>Gönderici bilgileri</h2>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="senderName">Firma adı</label>
+                  <input id="senderName" name="senderName">
+                </div>
+                <div class="field">
+                  <label for="senderPhone">Telefon</label>
+                  <input id="senderPhone" name="senderPhone">
+                </div>
+                <div class="field full-span">
+                  <label for="senderAddress">Gönderici adresi</label>
+                  <textarea id="senderAddress" name="senderAddress"></textarea>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="cluster">
+            <button class="btn btn-primary" type="submit">Kargo ayarlarını kaydet</button>
+            <button class="btn btn-outline" type="button" id="resetShippingSettings">Varsayılanlara dön</button>
+          </div>
+        </form>
+
+        <section class="page-block">
+          <div class="section-title">
+            <div>
+              <h2>Kargo firmaları</h2>
+              <p class="muted">Aktif firmalar sipariş detayındaki kargo seçimine eklenir.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Aktif</th>
+                  <th>Firma</th>
+                  <th>Durum</th>
+                  <th>Takip adresi</th>
+                </tr>
+              </thead>
+              <tbody id="cargoCompaniesTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../admin-js/auth.js"></script>
+    <script src="../components/admin-sidebar/admin-sidebar.js"></script>
+    <script src="../admin-js/shipping-manager.js"></script>
+    <script src="../admin-js/admin-app.js"></script>
+  </body>
+</html>

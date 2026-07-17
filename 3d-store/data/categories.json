@@ -1,27 +1,37 @@
 [
   {
-    "id": "workspace",
-    "name": "Calisma Alani",
-    "description": "Masa duzeni, standlar ve ofis icin moduler 3D baski urunleri."
+    "id": "cat-workspace",
+    "name": "Çalışma Alanı",
+    "slug": "calisma-alani",
+    "description": "Masa düzeni, standlar ve küçük işletme çalışma alanları için 3D baskı ürünler.",
+    "active": true
   },
   {
-    "id": "lighting",
-    "name": "Aydinlatma",
-    "description": "Dekoratif abajur, lamba govdesi ve ortam isigina uygun tasarimlar."
+    "id": "cat-lighting",
+    "name": "Aydınlatma",
+    "slug": "aydinlatma",
+    "description": "Dekoratif abajur, lamba gövdesi ve ortam ışığına uygun tasarımlar.",
+    "active": true
   },
   {
-    "id": "prototype",
+    "id": "cat-prototype",
     "name": "Prototip",
-    "description": "Mekanik, elektronik ve urun gelistirme projeleri icin fonksiyonel parcalar."
+    "slug": "prototip",
+    "description": "Mekanik, elektronik ve ürün geliştirme projeleri için fonksiyonel parçalar.",
+    "active": true
   },
   {
-    "id": "architecture",
-    "name": "Maket",
-    "description": "Mimari sunum, konsept model ve olcekli parca setleri."
+    "id": "cat-decor",
+    "name": "Dekor ve Hobi",
+    "slug": "dekor-hobi",
+    "description": "Figür, raf, maket ve hobi köşesi için sıcak dekoratif ürünler.",
+    "active": true
   },
   {
-    "id": "personalized",
-    "name": "Kisisel",
-    "description": "Isme, renge ve olcuye gore ozellestirilebilir hediyelik urunler."
+    "id": "cat-personalized",
+    "name": "Kişiye Özel",
+    "slug": "kisiye-ozel",
+    "description": "İsim, logo, ölçü ve renge göre özelleştirilebilen baskılar.",
+    "active": true
   }
 ]

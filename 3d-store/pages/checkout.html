@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ödeme | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/navbar/navbar.css">
+    <link rel="stylesheet" href="../components/footer/footer.css">
+    <link rel="stylesheet" href="../components/product-card/product-card.css">
+  </head>
+  <body data-page="checkout">
+    <div data-component="navbar"></div>
+    <main class="container" id="checkoutContent">
+      <header class="page-header">
+        <h1>Ödeme</h1>
+        <p>Sipariş bilgileri bu demo sürümde tarayıcınızda saklanır.</p>
+      </header>
+      <section class="checkout-layout">
+        <form class="form-card" id="checkoutForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">Ad Soyad</label>
+              <input id="name" name="name" required>
+            </div>
+            <div class="field">
+              <label for="phone">Telefon</label>
+              <input id="phone" name="phone" required>
+            </div>
+            <div class="field">
+              <label for="email">E-posta</label>
+              <input id="email" name="email" type="email" required>
+            </div>
+            <div class="field">
+              <label for="city">Şehir</label>
+              <input id="city" name="city" required>
+            </div>
+            <div class="field full-span">
+              <label for="address">Adres</label>
+              <textarea id="address" name="address" required></textarea>
+            </div>
+            <div class="field">
+              <label for="paymentMethod">Ödeme yöntemi</label>
+              <select id="paymentMethod" name="paymentMethod">
+                <option>Kapıda ödeme</option>
+                <option>Havale/EFT</option>
+                <option>Kredi kartı simülasyonu</option>
+              </select>
+            </div>
+            <div class="field full-span">
+              <label for="note">Sipariş notu</label>
+              <textarea id="note" name="note" placeholder="Renk, ölçü veya özel üretim notunuzu yazın"></textarea>
+            </div>
+          </div>
+          <button class="btn btn-primary" type="submit">Siparişi oluştur</button>
+        </form>
+        <aside class="checkout-summary stack">
+          <h2>Sipariş özeti</h2>
+          <div id="checkoutItems"></div>
+          <div id="checkoutTotals"></div>
+        </aside>
+      </section>
+    </main>
+    <div data-component="footer"></div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/payment.js"></script>
+    <script src="../js/shipping.js"></script>
+    <script src="../components/product-card/product-card.js"></script>
+    <script src="../js/cart.js"></script>
+    <script src="../js/categories.js"></script>
+    <script src="../js/products.js"></script>
+    <script src="../js/orders.js"></script>
+    <script src="../components/navbar/navbar.js"></script>
+    <script src="../components/footer/footer.js"></script>
+    <script src="../js/app.js"></script>
+  </body>
+</html>

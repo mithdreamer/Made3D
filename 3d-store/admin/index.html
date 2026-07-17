@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/admin-sidebar/admin-sidebar.css">
+  </head>
+  <body class="admin-body" data-admin-page="dashboard">
+    <div class="admin-shell">
+      <div data-component="admin-sidebar"></div>
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <span class="badge">MAde3D genel bakış</span>
+            <h1>Dashboard</h1>
+          </div>
+          <a class="btn btn-primary" href="new-product.html">Yeni ürün</a>
+        </header>
+        <section class="admin-grid" id="dashboardMetrics"></section>
+        <section class="page-block">
+          <div class="section-title">
+            <div>
+              <h2>Son siparişler</h2>
+              <p class="muted">Vitrinden oluşturulan siparişler burada listelenir.</p>
+            </div>
+            <a class="btn btn-outline" href="orders.html">Tüm siparişler</a>
+          </div>
+          <div class="admin-card" id="latestOrders"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../admin-js/auth.js"></script>
+    <script src="../components/admin-sidebar/admin-sidebar.js"></script>
+    <script src="../admin-js/image-upload.js"></script>
+    <script src="../admin-js/product-manager.js"></script>
+    <script src="../admin-js/category-manager.js"></script>
+    <script src="../admin-js/order-manager.js"></script>
+    <script src="../admin-js/admin-app.js"></script>
+  </body>
+</html>

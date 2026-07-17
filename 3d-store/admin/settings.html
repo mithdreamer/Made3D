@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ayarlar | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/admin-sidebar/admin-sidebar.css">
+  </head>
+  <body class="admin-body" data-admin-page="settings">
+    <div class="admin-shell">
+      <div data-component="admin-sidebar"></div>
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <span class="badge">MAde3D mağaza</span>
+            <h1>Ayarlar</h1>
+          </div>
+        </header>
+        <form class="form-card" id="settingsForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="siteName">Site adı</label>
+              <input id="siteName" name="siteName" required>
+            </div>
+            <div class="field">
+              <label for="shortName">Kısa logo metni</label>
+              <input id="shortName" name="shortName" maxlength="6" size="6" required>
+            </div>
+            <div class="field">
+              <label for="phone">Telefon</label>
+              <input id="phone" name="phone">
+            </div>
+            <div class="field">
+              <label for="email">E-posta</label>
+              <input id="email" name="email" type="email">
+            </div>
+            <div class="field full-span">
+              <label for="address">Adres</label>
+              <input id="address" name="address">
+            </div>
+            <div class="field">
+              <label for="adminUsername">Admin kullanıcı adı</label>
+              <input id="adminUsername" name="adminUsername" autocomplete="username" required>
+            </div>
+            <div class="field">
+              <label for="adminPassword">Admin şifre</label>
+              <input id="adminPassword" name="adminPassword" type="password" autocomplete="new-password" required>
+            </div>
+            <div class="field full-span">
+              <label for="heroTitle">Ana sayfa başlığı</label>
+              <input id="heroTitle" name="heroTitle">
+            </div>
+            <div class="field full-span">
+              <label for="heroSubtitle">Ana sayfa açıklaması</label>
+              <textarea id="heroSubtitle" name="heroSubtitle"></textarea>
+            </div>
+            <div class="field full-span">
+              <label for="aboutImageFiles">Hakkımızda sayfası fotoğrafı</label>
+              <input id="aboutImageFiles" type="file" accept="image/*">
+              <input id="aboutImage" name="aboutImage" type="hidden" value="">
+              <div class="image-preview-grid single-image-preview" id="aboutImagePreview"></div>
+              <button class="btn btn-outline" id="clearAboutImage" type="button">Fotoğrafı temizle</button>
+            </div>
+            <div class="field">
+              <label for="shippingFee">Kargo ücreti</label>
+              <input id="shippingFee" name="shippingFee" type="number" min="0">
+            </div>
+            <div class="field">
+              <label for="freeShippingThreshold">Ücretsiz kargo limiti</label>
+              <input id="freeShippingThreshold" name="freeShippingThreshold" type="number" min="0">
+            </div>
+          </div>
+          <div class="cluster">
+            <button class="btn btn-primary" type="submit">Ayarları kaydet</button>
+            <button class="btn btn-outline" type="button" data-export-store>Veriyi indir</button>
+            <button class="btn btn-danger" id="resetDemo" type="button">MAde3D demo verisine dön</button>
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../admin-js/auth.js"></script>
+    <script src="../components/admin-sidebar/admin-sidebar.js"></script>
+    <script src="../admin-js/image-upload.js"></script>
+    <script src="../admin-js/product-manager.js"></script>
+    <script src="../admin-js/category-manager.js"></script>
+    <script src="../admin-js/order-manager.js"></script>
+    <script src="../admin-js/admin-app.js"></script>
+  </body>
+</html>

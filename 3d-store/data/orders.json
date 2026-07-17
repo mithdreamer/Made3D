@@ -1,1 +1,41 @@
-[]
+[
+  {
+    "id": "ord-demo-MAde3D-1",
+    "number": "MAde-2026-0001",
+    "customer": {
+      "name": "Demo Müşteri",
+      "email": "demo@musteri.local",
+      "phone": "+90 555 111 22 33",
+      "address": "Örnek Mah. Atölye Sok. No: 3",
+      "city": "İstanbul"
+    },
+    "items": [
+      {
+        "productId": "prd-modul-desk-organizer",
+        "name": "Modül Masa Organizer",
+        "quantity": 1,
+        "price": 849
+      },
+      {
+        "productId": "prd-personal-nameplate",
+        "name": "Kişisel İsimlik",
+        "quantity": 2,
+        "price": 420
+      }
+    ],
+    "subtotal": 1689,
+    "shipping": 0,
+    "total": 1689,
+    "status": "preparing",
+    "paymentMethod": "Havale/EFT",
+    "paymentStatus": "paid",
+    "paymentProvider": "manual",
+    "transactionId": "DEMO-MAde-001",
+    "cargoCompany": "",
+    "trackingNumber": "",
+    "trackingUrl": "",
+    "shipmentStatus": "preparing",
+    "note": "Demo MAde3D siparişi.",
+    "createdAt": "2026-06-08T11:30:00.000Z"
+  }
+]

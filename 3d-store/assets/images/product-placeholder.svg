@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title>Ürün Yer Tutucu</title>
+  <desc>Ürün görseli yerine kullanılan basit bir örnek görsel.</desc>
+  <rect width="640" height="480" rx="32" fill="#e5f2ef" />
+  <rect x="80" y="120" width="480" height="240" rx="24" fill="#ffffff" stroke="#b0c4c3" stroke-width="16" />
+  <circle cx="240" cy="240" r="44" fill="#7d5cc6" />
+  <rect x="330" y="180" width="140" height="24" rx="12" fill="#7d5cc6" />
+  <rect x="330" y="220" width="80" height="16" rx="8" fill="#7d5cc6" />
+</svg>

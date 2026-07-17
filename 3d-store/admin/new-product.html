@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yeni Ürün | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/admin-sidebar/admin-sidebar.css">
+  </head>
+  <body class="admin-body" data-admin-page="product-form">
+    <div class="admin-shell">
+      <div data-component="admin-sidebar"></div>
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <span class="badge">Ürün formu</span>
+            <h1>Yeni ürün</h1>
+          </div>
+          <a class="btn btn-outline" href="products.html">Ürünlere dön</a>
+        </header>
+        <form class="form-card" id="productForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">Ürün adı</label>
+              <input id="name" name="name" required>
+            </div>
+            <div class="field">
+              <label for="sku">SKU</label>
+              <input id="sku" name="sku">
+            </div>
+            <div class="field">
+              <label for="categoryId">Kategori</label>
+              <select id="categoryId" name="categoryId" required></select>
+            </div>
+            <div class="field">
+              <label for="stock">Stok</label>
+              <input id="stock" name="stock" type="number" min="0" value="0" required>
+            </div>
+            <div class="field">
+              <label for="price">Fiyat</label>
+              <input id="price" name="price" type="number" min="0" step="1" required>
+            </div>
+            <div class="field">
+              <label for="oldPrice">Eski fiyat</label>
+              <input id="oldPrice" name="oldPrice" type="number" min="0" step="1">
+            </div>
+            <div class="field full-span">
+              <label for="shortDescription">Kısa açıklama</label>
+              <input id="shortDescription" name="shortDescription" maxlength="150">
+            </div>
+            <div class="field full-span">
+              <label for="description">Açıklama</label>
+              <textarea id="description" name="description"></textarea>
+            </div>
+            <div class="field full-span">
+              <label for="imageFiles">Ürün fotoğrafları</label>
+              <input id="imageFiles" type="file" accept="image/*" multiple>
+              <input id="productImages" name="productImages" type="hidden" value="[]">
+              <div class="image-preview-grid" id="imagePreview"></div>
+              <button class="btn btn-outline" id="clearImages" type="button">Görselleri temizle</button>
+            </div>
+            <label class="field-inline">
+              <input name="featured" type="checkbox">
+              <span>Öne çıkan ürün</span>
+            </label>
+            <label class="field-inline">
+              <input name="active" type="checkbox">
+              <span>Yayında</span>
+            </label>
+          </div>
+          <button class="btn btn-primary" type="submit">Ürünü kaydet</button>
+        </form>
+      </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../admin-js/auth.js"></script>
+    <script src="../components/admin-sidebar/admin-sidebar.js"></script>
+    <script src="../admin-js/image-upload.js"></script>
+    <script src="../admin-js/product-manager.js"></script>
+    <script src="../admin-js/category-manager.js"></script>
+    <script src="../admin-js/order-manager.js"></script>
+    <script src="../admin-js/admin-app.js"></script>
+  </body>
+</html>

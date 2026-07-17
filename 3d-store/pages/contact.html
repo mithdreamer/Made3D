@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>İletişim | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/navbar/navbar.css">
+    <link rel="stylesheet" href="../components/footer/footer.css">
+    <link rel="stylesheet" href="../components/product-card/product-card.css">
+  </head>
+  <body data-page="contact">
+    <div data-component="navbar"></div>
+    <main class="container">
+      <header class="page-header">
+        <h1>İletişim</h1>
+        <p>Özel baskı, küçük seri üretim veya prototip fikriniz için kısa bir not bırakın.</p>
+      </header>
+      <section class="grid grid-2 page-block">
+        <form class="form-card" id="contactForm">
+          <div class="field">
+            <label for="contactName">Ad Soyad</label>
+            <input id="contactName" name="name" required>
+          </div>
+          <div class="field">
+            <label for="contactEmail">E-posta</label>
+            <input id="contactEmail" name="email" type="email" required>
+          </div>
+          <div class="field">
+              <label for="contactMessage">Mesaj</label>
+              <textarea id="contactMessage" name="message" placeholder="Ölçü, renk, adet veya kullanım amacını yazın" required></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Gönder</button>
+        </form>
+        <aside class="contact-panel stack">
+          <h2>Atölye bilgileri</h2>
+          <p class="muted">MAde3D demo mağazasında iletişim bilgileri ve hakkımızda fotoğrafı admin ayarlarından yönetilir.</p>
+          <a class="btn btn-outline" href="../admin/settings.html">Admin ayarları</a>
+        </aside>
+      </section>
+    </main>
+    <div data-component="footer"></div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../components/product-card/product-card.js"></script>
+    <script src="../js/cart.js"></script>
+    <script src="../js/categories.js"></script>
+    <script src="../js/products.js"></script>
+    <script src="../js/orders.js"></script>
+    <script src="../components/navbar/navbar.js"></script>
+    <script src="../components/footer/footer.js"></script>
+    <script src="../js/app.js"></script>
+  </body>
+</html>
