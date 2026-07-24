@@ -1,6 +1,6 @@
 (function () {
   const render = (product) => {
-    const category = Utils.getCategoryName(product.categoryId);
+    const category = product.categoryName || Utils.getCategoryName(product.categoryId);
     const discount = product.oldPrice > product.price;
     return `
       <article class="product-card">

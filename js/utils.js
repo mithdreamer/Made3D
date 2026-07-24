@@ -44,7 +44,8 @@
   const statusLabel = (value) => status[value] || "Yeni";
 
   const getCategoryName = (categoryId) => {
-    const category = window.Store?.getCategories({ includeInactive: true }).find((item) => item.id === categoryId);
+    const categories = window.Store?.getCachedCategories?.({ includeInactive: true }) || [];
+    const category = categories.find((item) => item.id === categoryId);
     return category?.name || "Kategorisiz";
   };
 
@@ -58,6 +59,7 @@
 
   const imageUrl = (src) => {
     if (!src) return imageFallback();
+    if (typeof src === "object") return imageUrl(src.url || src.src || "");
     if (/^(data:|blob:|https?:|\/)/i.test(src)) return src;
     if (src.startsWith("assets/")) return `${rootPath()}${src}`;
     return src;

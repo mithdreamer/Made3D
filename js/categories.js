@@ -1,9 +1,12 @@
 (function () {
-  const renderCategoryTiles = (selector) => {
+  const renderCategoryTiles = async (selector) => {
     const container = document.querySelector(selector);
     if (!container) return;
-    const products = Store.getProducts();
-    container.innerHTML = Store.getCategories()
+    const [products, categories] = await Promise.all([
+      Store.getProducts(),
+      Store.getCategories()
+    ]);
+    container.innerHTML = categories
       .map((category) => {
         const count = products.filter((product) => product.categoryId === category.id).length;
         return `

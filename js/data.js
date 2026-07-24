@@ -8,8 +8,6 @@
       phone: "+90 555 123 45 67",
       email: "merhaba@MAde3D.local",
       address: "İzmir, Türkiye",
-      adminUsername: "admin",
-      adminPassword: "123456",
       heroTitle: "3D baskı ile fikrini ürüne dönüştür",
       heroSubtitle:
         "MAde3D; kişiye özel baskılar, prototip parçalar ve hobi/dekoratif 3D ürünler için modern, yönetilebilir bir mağaza vitrini.",

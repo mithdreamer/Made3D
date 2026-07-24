@@ -13,11 +13,10 @@
           <div>
             <span class="badge">MAde3D Admin</span>
             <h1>Giriş yap</h1>
-            <p class="muted">Varsayılan giriş: admin / 123456</p>
           </div>
           <div class="field">
-            <label for="username">Kullanıcı adı</label>
-            <input id="username" name="username" autocomplete="username" required>
+            <label for="email">E-posta</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
           </div>
           <div class="field">
             <label for="password">Şifre</label>
@@ -30,9 +29,8 @@
       </section>
     </main>
 
-    <script src="../js/data.js"></script>
-    <script src="../js/storage.js"></script>
-    <script src="../js/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
     <script src="../admin-js/auth.js"></script>
   </body>
 </html>

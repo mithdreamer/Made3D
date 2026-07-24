@@ -34,7 +34,15 @@
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    (Store.ready || Promise.resolve()).then(renderAdminSidebar);
+    Promise.all([
+      Store.ready || Promise.resolve(),
+      window.AdminAuth?.requireAdminSession?.() || Promise.resolve()
+    ]).then(([_, session]) => {
+      if (window.AdminAuth && !session) return;
+      renderAdminSidebar();
+    }).catch((error) => {
+      console.error("Admin sidebar yuklenemedi:", error);
+    });
   });
   window.AdminSidebar = { renderAdminSidebar };
 })();

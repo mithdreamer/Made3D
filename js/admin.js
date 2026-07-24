@@ -1,23 +1,26 @@
 (function () {
-  const ADMIN_AUTH_KEY = "three-d-store-admin-auth-v1";
-  const ADMIN_EMAIL = "admin@3dstore.local";
-  const ADMIN_PASSWORD = "1234";
+  const LEGACY_ADMIN_AUTH_KEY = "three-d-store-admin-auth-v1";
 
   function isAuthenticated() {
-    return localStorage.getItem(ADMIN_AUTH_KEY) === "true";
+    return window.AdminAuth?.isAuthenticated?.() === true;
   }
 
-  function requireAuth() {
-    if (!isAuthenticated()) {
-      window.location.href = "login.html";
+  async function requireAuth() {
+    localStorage.removeItem(LEGACY_ADMIN_AUTH_KEY);
+    sessionStorage.removeItem(LEGACY_ADMIN_AUTH_KEY);
+
+    if (window.AdminAuth?.requireAdminSession) {
+      return AdminAuth.requireAdminSession();
     }
+
+    window.location.href = "login.html";
+    return null;
   }
 
   function bindLogout() {
     document.querySelectorAll("[data-admin-logout]").forEach((button) => {
       button.addEventListener("click", () => {
-        localStorage.removeItem(ADMIN_AUTH_KEY);
-        window.location.href = "login.html";
+        window.AdminAuth?.signOut?.() || (window.location.href = "login.html");
       });
     });
   }
@@ -25,19 +28,21 @@
   function bindLogin(form) {
     const errorNode = form.querySelector(".form-error");
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(form);
       const email = (formData.get("email") || "").toString().trim();
       const password = (formData.get("password") || "").toString();
 
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        localStorage.setItem(ADMIN_AUTH_KEY, "true");
+      try {
+        if (!window.AdminAuth?.signIn) throw new Error("Supabase Auth yuklenemedi.");
+        await window.AdminAuth?.signIn?.(email, password);
         window.location.href = "dashboard.html";
         return;
+      } catch (error) {
+        errorNode.textContent = error.message || "E-posta veya sifre hatali.";
       }
 
-      errorNode.textContent = "E-posta veya şifre hatalı.";
     });
   }
 
@@ -445,14 +450,15 @@
     `).join("");
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     const loginForm = document.querySelector("[data-admin-login]");
     if (loginForm) {
       bindLogin(loginForm);
       return;
     }
 
-    requireAuth();
+    const session = await requireAuth();
+    if (!session && window.AdminAuth) return;
     renderAdminNavigation();
     bindLogout();
 

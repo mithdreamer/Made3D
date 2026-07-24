@@ -2,6 +2,9 @@ const { test, expect } = require("@playwright/test");
 const path = require("path");
 
 test("MAde3D storefront and admin demo flow", async ({ page }) => {
+  const adminEmail = process.env.MADE3D_ADMIN_EMAIL;
+  const adminPassword = process.env.MADE3D_ADMIN_PASSWORD;
+
   await page.goto("http://localhost:8080/");
   await expect(page).toHaveTitle(/MAde3D/);
   await expect(page.getByRole("heading", { name: /3D baskı/i })).toBeVisible();
@@ -27,8 +30,16 @@ test("MAde3D storefront and admin demo flow", async ({ page }) => {
 
   await page.goto("http://localhost:8080/admin/");
   await expect(page).toHaveURL(/admin\/login\.html/);
-  await page.getByLabel("Kullanıcı adı").fill("admin");
-  await page.getByLabel("Şifre").fill("123456");
+  if (!adminEmail || !adminPassword) {
+    test.info().annotations.push({
+      type: "note",
+      description: "Admin Supabase Auth akisi icin MADE3D_ADMIN_EMAIL ve MADE3D_ADMIN_PASSWORD gerekir."
+    });
+    return;
+  }
+
+  await page.getByLabel("E-posta").fill(adminEmail);
+  await page.getByLabel("Şifre").fill(adminPassword);
   await page.getByRole("button", { name: /Giriş yap/i }).click();
   await expect(page).toHaveURL(/admin\/index\.html/);
   await expect(page.getByText("MAde3D Admin")).toBeVisible();

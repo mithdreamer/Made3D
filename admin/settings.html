@@ -39,14 +39,6 @@
               <label for="address">Adres</label>
               <input id="address" name="address">
             </div>
-            <div class="field">
-              <label for="adminUsername">Admin kullanıcı adı</label>
-              <input id="adminUsername" name="adminUsername" autocomplete="username" required>
-            </div>
-            <div class="field">
-              <label for="adminPassword">Admin şifre</label>
-              <input id="adminPassword" name="adminPassword" type="password" autocomplete="new-password" required>
-            </div>
             <div class="field full-span">
               <label for="heroTitle">Ana sayfa başlığı</label>
               <input id="heroTitle" name="heroTitle">
@@ -80,10 +72,14 @@
       </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../admin-js/auth.js"></script>
     <script src="../js/data.js"></script>
+    <script src="../js/repositories/productRepository.js"></script>
+    <script src="../js/repositories/categoryRepository.js"></script>
     <script src="../js/storage.js"></script>
     <script src="../js/utils.js"></script>
-    <script src="../admin-js/auth.js"></script>
     <script src="../components/admin-sidebar/admin-sidebar.js"></script>
     <script src="../admin-js/image-upload.js"></script>
     <script src="../admin-js/product-manager.js"></script>

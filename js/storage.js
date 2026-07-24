@@ -1,7 +1,5 @@
 (function () {
   const KEYS = {
-    products: "MAde3D.products",
-    categories: "MAde3D.categories",
     orders: "MAde3D.orders",
     settings: "MAde3D.settings",
     paymentSettings: "MAde3D.paymentSettings",
@@ -10,12 +8,14 @@
   };
 
   const seed = () => window.ECommerceSeed || {};
-  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const clone = (value) => (value === undefined ? undefined : JSON.parse(JSON.stringify(value)));
   const REMOTE_STORE_URL = "/.netlify/functions/store";
-  const REMOTE_KEYS = new Set([KEYS.settings, KEYS.categories, KEYS.products]);
+  const REMOTE_KEYS = new Set([KEYS.settings]);
   let remoteAvailable = true;
   let remoteWriteTimer = null;
   let applyingRemoteState = false;
+  let productCache = [];
+  let categoryCache = [];
 
   const paymentDefaults = {
     enabled: true,
@@ -61,14 +61,14 @@
       branchCode: ""
     },
     sender: {
-      name: "MAde3D Atölye",
+      name: "MAde3D Atolye",
       phone: "+90 555 123 45 67",
-      address: "İstanbul, Türkiye"
+      address: "Istanbul, Turkiye"
     },
     carriers: [
       {
         id: "yurtici",
-        name: "Yurtiçi",
+        name: "Yurtici",
         active: true,
         integrationReady: true,
         trackingUrl: ""
@@ -103,7 +103,7 @@
       },
       {
         id: "other",
-        name: "Diğer",
+        name: "Diger",
         active: false,
         integrationReady: false,
         trackingUrl: ""
@@ -116,7 +116,7 @@
       const raw = localStorage.getItem(key);
       return raw ? JSON.parse(raw) : clone(fallback);
     } catch (error) {
-      console.warn("Local veri okunamadı:", key, error);
+      console.warn("Local veri okunamadi:", key, error);
       return clone(fallback);
     }
   };
@@ -126,18 +126,31 @@
     return value;
   };
 
+  const isLocalStaticHost = () =>
+    ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+
   const remoteSupported = () =>
-    typeof window.fetch === "function" && window.location.protocol !== "file:" && remoteAvailable;
+    typeof window.fetch === "function" &&
+    window.location.protocol !== "file:" &&
+    !isLocalStaticHost() &&
+    remoteAvailable;
 
   const publicSettings = (settings = {}) => {
     const { adminUsername, adminPassword, ...sharedSettings } = settings || {};
     return sharedSettings;
   };
 
+  const sanitizeStoredSettings = () => {
+    const settings = read(KEYS.settings, seed().settings || {});
+    const sanitized = publicSettings(settings);
+    if ("adminUsername" in settings || "adminPassword" in settings) {
+      writeLocal(KEYS.settings, sanitized);
+    }
+    return sanitized;
+  };
+
   const catalogSnapshot = () => ({
-    settings: publicSettings(read(KEYS.settings, seed().settings || {})),
-    categories: read(KEYS.categories, seed().categories || []),
-    products: read(KEYS.products, seed().products || [])
+    settings: publicSettings(read(KEYS.settings, seed().settings || {}))
   });
 
   const persistRemoteCatalog = async () => {
@@ -154,7 +167,7 @@
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
     } catch (error) {
       remoteAvailable = false;
-      console.info("Ortak katalog deposuna yazılamadı; yerel kayıt kullanılacak.", error);
+      console.info("Ortak ayar deposuna yazilamadi; yerel kayit kullanilacak.", error);
     }
   };
 
@@ -195,12 +208,13 @@
   const init = () => {
     const data = seed();
     if (!localStorage.getItem(KEYS.settings)) writeLocal(KEYS.settings, data.settings || {});
+    sanitizeStoredSettings();
     if (!localStorage.getItem(KEYS.paymentSettings)) writeLocal(KEYS.paymentSettings, data.paymentSettings || paymentDefaults);
     if (!localStorage.getItem(KEYS.shippingSettings)) writeLocal(KEYS.shippingSettings, data.shippingSettings || shippingDefaults);
-    if (!localStorage.getItem(KEYS.categories)) writeLocal(KEYS.categories, data.categories || []);
-    if (!localStorage.getItem(KEYS.products)) writeLocal(KEYS.products, data.products || []);
     if (!localStorage.getItem(KEYS.orders)) writeLocal(KEYS.orders, data.orders || []);
     if (!localStorage.getItem(KEYS.cart)) writeLocal(KEYS.cart, []);
+    productCache = localProducts({ includeInactive: true });
+    categoryCache = localCategories({ includeInactive: true });
   };
 
   const applyRemoteCatalog = (data = {}) => {
@@ -212,8 +226,6 @@
           ...publicSettings(data.settings)
         });
       }
-      if (Array.isArray(data.categories)) writeLocal(KEYS.categories, data.categories);
-      if (Array.isArray(data.products)) writeLocal(KEYS.products, data.products);
     } finally {
       applyingRemoteState = false;
     }
@@ -232,12 +244,12 @@
       applyRemoteCatalog(await response.json());
     } catch (error) {
       remoteAvailable = false;
-      console.info("Ortak katalog deposu okunamadı; yerel veri kullanılacak.", error);
+      console.info("Ortak ayar deposu okunamadi; yerel veri kullanilacak.", error);
     }
   };
 
-  const getSettings = () => ({ ...(seed().settings || {}), ...read(KEYS.settings, seed().settings || {}) });
-  const saveSettings = (settings) => write(KEYS.settings, { ...getSettings(), ...settings });
+  const getSettings = () => publicSettings({ ...(seed().settings || {}), ...read(KEYS.settings, seed().settings || {}) });
+  const saveSettings = (settings) => write(KEYS.settings, publicSettings({ ...getSettings(), ...settings }));
   const getDefaultPaymentSettings = () => clone(seed().paymentSettings || paymentDefaults);
   const getPaymentSettings = () => ({
     ...getDefaultPaymentSettings(),
@@ -294,135 +306,256 @@
     return write(KEYS.shippingSettings, mergeShippingSettings(defaults, source));
   };
 
-  const getCategories = (options = {}) => {
-    const categories = read(KEYS.categories, seed().categories || []);
+  const setCategoryCache = (categories) => {
+    categoryCache = Array.isArray(categories) ? clone(categories) : [];
+    return categoryCache;
+  };
+
+  const setProductCache = (products) => {
+    productCache = Array.isArray(products) ? clone(products) : [];
+    return productCache;
+  };
+
+  function localCategories(options = {}) {
+    const categories = clone(seed().categories || []);
     return options.includeInactive ? categories : categories.filter((category) => category.active !== false);
-  };
+  }
 
-  const saveCategories = (categories) => write(KEYS.categories, categories);
-
-  const upsertCategory = (category) => {
-    const categories = getCategories({ includeInactive: true });
-    const now = new Date().toISOString();
-    const nextCategory = {
-      id: category.id || makeId("cat"),
-      name: category.name,
-      slug: category.slug || slugify(category.name),
-      description: category.description || "",
-      active: category.active !== false,
-      createdAt: category.createdAt || now,
-      updatedAt: now
-    };
-    const index = categories.findIndex((item) => item.id === nextCategory.id);
-    if (index >= 0) categories[index] = { ...categories[index], ...nextCategory };
-    else categories.push(nextCategory);
-    saveCategories(categories);
-    return nextCategory;
-  };
-
-  const deleteCategory = (categoryId) => {
-    const used = getProducts({ includeInactive: true }).some((product) => product.categoryId === categoryId);
-    if (used) {
-      throw new Error("Bu kategoriye bağlı ürünler var. Önce ürünlerin kategorisini değiştirin.");
-    }
-    saveCategories(getCategories({ includeInactive: true }).filter((category) => category.id !== categoryId));
-  };
-
-  const getProducts = (options = {}) => {
-    const products = read(KEYS.products, seed().products || []);
+  function localProducts(options = {}) {
+    const categories = new Map(localCategories({ includeInactive: true }).map((category) => [category.id, category]));
+    const products = clone(seed().products || []).map((product) => {
+      const category = categories.get(product.categoryId);
+      return {
+        ...product,
+        categoryName: product.categoryName || category?.name || "",
+        categorySlug: product.categorySlug || category?.slug || ""
+      };
+    });
     return options.includeInactive ? products : products.filter((product) => product.active !== false);
+  }
+
+  const getCachedCategories = (options = {}) => {
+    const categories = categoryCache.length ? categoryCache : localCategories({ includeInactive: true });
+    return options.includeInactive ? clone(categories) : clone(categories.filter((category) => category.active !== false));
   };
 
-  const saveProducts = (products) => write(KEYS.products, products);
+  const getCachedProducts = (options = {}) => {
+    const products = productCache.length ? productCache : localProducts({ includeInactive: true });
+    return options.includeInactive ? clone(products) : clone(products.filter((product) => product.active !== false));
+  };
 
-  const upsertProduct = (product) => {
-    const products = getProducts({ includeInactive: true });
-    const now = new Date().toISOString();
-    const nextProduct = {
-      id: product.id || makeId("prd"),
-      name: product.name,
+  const requireProductRepository = () => {
+    if (!window.ProductRepository) {
+      throw new Error("ProductRepository yuklenmedi. Script sirasini kontrol edin.");
+    }
+    return window.ProductRepository;
+  };
+
+  const requireCategoryRepository = () => {
+    if (!window.CategoryRepository) {
+      throw new Error("CategoryRepository yuklenmedi. Script sirasini kontrol edin.");
+    }
+    return window.CategoryRepository;
+  };
+
+  const getCategories = async (options = {}) => {
+    if (!window.CategoryRepository) return localCategories(options);
+    const categories = await window.CategoryRepository.getCategories(options);
+    setCategoryCache(options.includeInactive ? categories : await window.CategoryRepository.getCategories({ includeInactive: true }));
+    return categories;
+  };
+
+  const getCategoryById = async (categoryId, options = {}) => {
+    if (!categoryId) return null;
+    if (!window.CategoryRepository) {
+      return localCategories(options).find((category) => category.id === categoryId) || null;
+    }
+    return window.CategoryRepository.getCategoryById(categoryId, options);
+  };
+
+  const getCategoryBySlug = async (slug, options = {}) => {
+    if (!slug) return null;
+    if (!window.CategoryRepository) {
+      return localCategories(options).find((category) => category.slug === slug || category.id === slug) || null;
+    }
+    return window.CategoryRepository.getCategoryBySlug(slug, options);
+  };
+
+  const upsertCategory = async (category) => {
+    const repository = requireCategoryRepository();
+    if (!category?.name?.trim()) throw new Error("Kategori adi zorunludur.");
+
+    const saved = await repository.upsertCategory({
+      ...category,
+      id: category.id || undefined,
+      slug: category.slug || slugify(category.name),
+      active: category.active !== false
+    });
+
+    await getCategories({ includeInactive: true });
+    return saved;
+  };
+
+  const deleteCategory = async (categoryId) => {
+    if (!categoryId) throw new Error("Silinecek kategori bulunamadi.");
+    const products = await getProducts({ includeInactive: true });
+    const used = products.some((product) => product.categoryId === categoryId && product.active !== false);
+    if (used) {
+      throw new Error("Bu kategoriye bagli urunler var. Once urunlerin kategorisini degistirin.");
+    }
+
+    const deleted = await requireCategoryRepository().deleteCategory(categoryId);
+    await getCategories({ includeInactive: true });
+    return deleted;
+  };
+
+  const getProducts = async (options = {}) => {
+    if (!window.ProductRepository) return localProducts(options);
+    const products = await window.ProductRepository.getProducts(options);
+    setProductCache(options.includeInactive ? products : await window.ProductRepository.getProducts({ includeInactive: true }));
+    return products;
+  };
+
+  const getProductById = async (productId, options = {}) => {
+    if (!productId) return null;
+    if (!window.ProductRepository) {
+      return localProducts(options).find((product) => product.id === productId) || null;
+    }
+    return window.ProductRepository.getProductById(productId, options);
+  };
+
+  const getProductBySlug = async (slug, options = {}) => {
+    if (!slug) return null;
+    if (!window.ProductRepository) {
+      return localProducts(options).find((product) => product.slug === slug || product.id === slug) || null;
+    }
+
+    const product = await window.ProductRepository.getProductBySlug(slug, options);
+    if (product) return product;
+    return window.ProductRepository.getProductById(slug, options);
+  };
+
+  const upsertProduct = async (product) => {
+    const repository = requireProductRepository();
+    if (!product?.name?.trim()) throw new Error("Urun adi zorunludur.");
+
+    const saved = await repository.upsertProduct({
+      ...product,
+      id: product.id || undefined,
       slug: product.slug || slugify(product.name),
-      sku: product.sku || "",
-      categoryId: product.categoryId || "",
-      shortDescription: product.shortDescription || "",
-      description: product.description || "",
-      price: Number(product.price) || 0,
-      oldPrice: Number(product.oldPrice) || 0,
-      stock: Number(product.stock) || 0,
-      active: product.active !== false,
-      featured: Boolean(product.featured),
-      images: Array.isArray(product.images) ? product.images.filter(Boolean) : [],
-      createdAt: product.createdAt || now,
-      updatedAt: now
-    };
-    const index = products.findIndex((item) => item.id === nextProduct.id);
-    if (index >= 0) products[index] = { ...products[index], ...nextProduct };
-    else products.push(nextProduct);
-    saveProducts(products);
-    return nextProduct;
+      active: product.active !== false
+    });
+
+    await getProducts({ includeInactive: true });
+    return saved;
   };
 
-  const deleteProduct = (productId) => {
-    saveProducts(getProducts({ includeInactive: true }).filter((product) => product.id !== productId));
-    const cart = getCart().filter((line) => line.productId !== productId);
-    setCart(cart);
+  const deleteProduct = async (productId) => {
+    if (!productId) throw new Error("Silinecek urun bulunamadi.");
+    const deleted = await requireProductRepository().deleteProduct(productId);
+    setCart(getCart().filter((line) => line.productId !== productId));
+    await getProducts({ includeInactive: true });
+    return deleted;
   };
 
-  const getProductById = (productId, options = {}) =>
-    getProducts(options).find((product) => product.id === productId);
+  const updateProductStock = async (productId, quantityOrDelta) =>
+    requireProductRepository().updateStock(productId, quantityOrDelta);
 
-  const getProductBySlug = (slug, options = {}) =>
-    getProducts(options).find((product) => product.slug === slug || product.id === slug);
+  const getLineProductId = (line = {}) =>
+    line.productId || line.product_id || line.id || line.product?.id || "";
 
-  const getCart = () => read(KEYS.cart, []);
-  const setCart = (cart) => write(KEYS.cart, cart);
+  const normalizeCartLine = (line = {}) => {
+    const productId = getLineProductId(line);
+    const quantity = Math.max(1, Number(line.quantity) || 1);
+    const nextLine = { productId, quantity };
+    if (line.variant) nextLine.variant = line.variant;
+    if (line.variantId) nextLine.variantId = line.variantId;
+    return productId ? nextLine : null;
+  };
 
-  const addToCart = (productId, quantity = 1) => {
-    const product = getProductById(productId);
-    if (!product) throw new Error("Ürün bulunamadı.");
-    const maxStock = Number.isFinite(Number(product.stock)) ? Number(product.stock) : 99;
-    if (maxStock <= 0) throw new Error("Ürün stokta yok.");
+  const getCart = () =>
+    (Array.isArray(read(KEYS.cart, [])) ? read(KEYS.cart, []) : [])
+      .map(normalizeCartLine)
+      .filter(Boolean);
+
+  const setCart = (cart) => write(KEYS.cart, (Array.isArray(cart) ? cart : []).map(normalizeCartLine).filter(Boolean));
+
+  const availableStock = (product) => {
+    const stock = Number(product?.stock);
+    return Number.isFinite(stock) ? stock : 0;
+  };
+
+  const ensureProductCanBePurchased = (product, quantity) => {
+    if (!product) throw new Error("Urun bulunamadi.");
+    if (product.active === false) throw new Error("Bu urun satis icin aktif degil.");
+    const stock = availableStock(product);
+    if (stock <= 0) throw new Error("Urun stokta yok.");
+    if (quantity > stock) throw new Error(`Stok yetersiz. En fazla ${stock} adet ekleyebilirsiniz.`);
+  };
+
+  const addToCart = async (productId, quantity = 1) => {
+    const nextQuantity = Math.max(1, Number(quantity) || 1);
+    const product = await getProductById(productId);
+    ensureProductCanBePurchased(product, nextQuantity);
+
     const cart = getCart();
     const line = cart.find((item) => item.productId === productId);
-    const nextQuantity = Math.max(1, Number(quantity) || 1);
-    if (line) line.quantity = Math.min(maxStock, line.quantity + nextQuantity);
-    else cart.push({ productId, quantity: Math.min(maxStock, nextQuantity) });
-    setCart(cart);
-    return cart;
+    const currentQuantity = Number(line?.quantity) || 0;
+    const totalQuantity = currentQuantity + nextQuantity;
+    ensureProductCanBePurchased(product, totalQuantity);
+
+    if (line) line.quantity = totalQuantity;
+    else cart.push({ productId, quantity: nextQuantity });
+    return setCart(cart);
   };
 
-  const updateCartItem = (productId, quantity) => {
+  const removeFromCart = (productId) => setCart(getCart().filter((line) => line.productId !== productId));
+  const removeCartItem = removeFromCart;
+  const clearCart = () => setCart([]);
+
+  const updateCartItem = async (productId, quantity) => {
     const nextQuantity = Number(quantity);
-    if (nextQuantity <= 0) return removeCartItem(productId);
+    if (nextQuantity <= 0) return removeFromCart(productId);
+
+    const product = await getProductById(productId);
+    ensureProductCanBePurchased(product, nextQuantity);
+
     const cart = getCart().map((line) =>
       line.productId === productId ? { ...line, quantity: nextQuantity } : line
     );
     return setCart(cart);
   };
 
-  const removeCartItem = (productId) => setCart(getCart().filter((line) => line.productId !== productId));
-  const clearCart = () => setCart([]);
+  const getCartItems = async () => {
+    const products = await getProducts({ includeInactive: true });
+    const productsById = new Map(products.map((product) => [product.id, product]));
 
-  const getCartItems = () =>
-    getCart()
+    return getCart()
       .map((line) => {
-        const product = getProductById(line.productId);
+        const product = productsById.get(line.productId);
         if (!product) return null;
         return {
           productId: product.id,
           name: product.name,
           slug: product.slug,
-          image: product.images?.[0] || "",
+          image: product.images?.[0] || product.primaryImageUrl || "",
           price: product.price,
           quantity: Number(line.quantity) || 1,
-          stock: product.stock
+          stock: product.stock,
+          active: product.active !== false,
+          variant: line.variant,
+          variantId: line.variantId
         };
       })
       .filter(Boolean);
+  };
 
-  const calculateCart = (items = getCartItems()) => {
+  const calculateCart = (items = []) => {
     const settings = getSettings();
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = (Array.isArray(items) ? items : []).reduce(
+      (sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 0),
+      0
+    );
     const freeLimit = Number(settings.freeShippingThreshold) || 0;
     const shippingFee = Number(settings.shippingFee) || 0;
     const shipping = subtotal === 0 || (freeLimit > 0 && subtotal >= freeLimit) ? 0 : shippingFee;
@@ -437,13 +570,16 @@
   const getOrderById = (orderId) =>
     getOrders().find((order) => order.id === orderId || order.number === orderId);
 
-  const createOrder = ({ customer, paymentMethod, note }) => {
-    const cartItems = getCartItems();
-    if (!cartItems.length) throw new Error("Sepet boş.");
+  const createOrder = async ({ customer, paymentMethod, note }) => {
+    const cartItems = await getCartItems();
+    if (!cartItems.length) throw new Error("Sepet bos.");
+
+    cartItems.forEach((item) => ensureProductCanBePurchased(item, item.quantity));
+
     const totals = calculateCart(cartItems);
     const orders = getOrders();
     const paymentSettings = getPaymentSettings();
-    const selectedPaymentMethod = paymentMethod || "Kapıda ödeme";
+    const selectedPaymentMethod = paymentMethod || "Kapida odeme";
     const isCardPayment = selectedPaymentMethod.toLocaleLowerCase("tr-TR").includes("kredi kart");
     const now = new Date();
     const order = {
@@ -472,14 +608,13 @@
       createdAt: now.toISOString()
     };
 
+    for (const item of cartItems) {
+      await updateProductStock(item.productId, { delta: -item.quantity });
+    }
+
     saveOrders([order, ...orders]);
-    const products = getProducts({ includeInactive: true }).map((product) => {
-      const line = cartItems.find((item) => item.productId === product.id);
-      if (!line) return product;
-      return { ...product, stock: Math.max(0, Number(product.stock || 0) - line.quantity) };
-    });
-    saveProducts(products);
     clearCart();
+    await getProducts({ includeInactive: true });
     return order;
   };
 
@@ -531,18 +666,16 @@
     write(KEYS.settings, data.settings || {});
     write(KEYS.paymentSettings, data.paymentSettings || paymentDefaults);
     write(KEYS.shippingSettings, data.shippingSettings || shippingDefaults);
-    write(KEYS.categories, data.categories || []);
-    write(KEYS.products, data.products || []);
     write(KEYS.orders, data.orders || []);
     write(KEYS.cart, []);
   };
 
-  const exportData = () => ({
+  const exportData = async () => ({
     settings: getSettings(),
     paymentSettings: getPaymentSettings(),
     shippingSettings: getShippingSettings(),
-    categories: getCategories({ includeInactive: true }),
-    products: getProducts({ includeInactive: true }),
+    categories: await getCategories({ includeInactive: true }),
+    products: await getProducts({ includeInactive: true }),
     orders: getOrders()
   });
 
@@ -560,17 +693,23 @@
     getShippingSettings,
     saveShippingSettings,
     getCategories,
+    getCachedCategories,
+    getCategoryById,
+    getCategoryBySlug,
     upsertCategory,
     deleteCategory,
     getProducts,
+    getCachedProducts,
     upsertProduct,
     deleteProduct,
+    updateProductStock,
     getProductById,
     getProductBySlug,
     getCart,
     setCart,
     addToCart,
     updateCartItem,
+    removeFromCart,
     removeCartItem,
     clearCart,
     getCartItems,

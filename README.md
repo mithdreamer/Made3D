@@ -20,11 +20,8 @@ http://localhost:8080/
 http://localhost:8080/admin/
 ```
 
-Varsayılan giriş:
-
-```text
-admin / 123456
-```
+Admin girişi Supabase Auth ile yapılır. Kullanıcının `app_metadata.role`
+değeri `admin` olmalıdır.
 
 ## Netlify
 

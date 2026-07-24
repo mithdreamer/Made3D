@@ -38,14 +38,14 @@
     frame.classList.remove("is-hidden");
   };
 
-  const initPublicPage = () => {
+  const initPublicPage = async () => {
     const page = document.body.dataset.page;
     applySettingsText();
-    if (page === "home") Products.renderHome();
-    if (page === "products") Products.renderProductsPage();
-    if (page === "product-detail") Products.renderDetailPage();
-    if (page === "cart") Cart.renderCartPage();
-    if (page === "checkout") Cart.renderCheckoutPage();
+    if (page === "home") await Products.renderHome();
+    if (page === "products") await Products.renderProductsPage();
+    if (page === "product-detail") await Products.renderDetailPage();
+    if (page === "cart") await Cart.renderCartPage();
+    if (page === "checkout") await Cart.renderCheckoutPage();
     if (page === "order-success") Orders.renderOrderSuccess();
     if (page === "about") renderAboutPage();
     bindContactForm();

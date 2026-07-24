@@ -1,9 +1,9 @@
 (function () {
-  const renderDashboard = () => {
+  const renderDashboard = async () => {
     const metrics = document.querySelector("#dashboardMetrics");
     const latest = document.querySelector("#latestOrders");
     if (!metrics) return;
-    const products = Store.getProducts({ includeInactive: true });
+    const products = await Store.getProducts({ includeInactive: true });
     const activeProducts = products.filter((product) => product.active !== false);
     const orders = Store.getOrders();
     const revenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -70,8 +70,6 @@
         phone: data.get("phone"),
         email: data.get("email"),
         address: data.get("address"),
-        adminUsername: data.get("adminUsername"),
-        adminPassword: data.get("adminPassword"),
         heroTitle: data.get("heroTitle"),
         heroSubtitle: data.get("heroSubtitle"),
         aboutImage: data.get("aboutImage"),
@@ -91,21 +89,30 @@
   };
 
   const bindExport = () => {
-    document.addEventListener("click", (event) => {
+    document.addEventListener("click", async (event) => {
       if (!event.target.closest("[data-export-store]")) return;
-      Utils.downloadJSON("MAde3D-store-data.json", Store.exportData());
+      Utils.downloadJSON("MAde3D-store-data.json", await Store.exportData());
     });
   };
 
-  const initAdminPage = () => {
-    if (window.AdminAuth && !AdminAuth.isAuthenticated()) return;
+  const initAdminPage = async () => {
+    if (window.AdminAuth) {
+      try {
+        const session = await AdminAuth.requireAdminSession();
+        if (!session) return;
+      } catch (error) {
+        console.error("Admin oturumu dogrulanamadi:", error);
+        return;
+      }
+    }
+
     const page = document.body.dataset.adminPage;
     bindExport();
-    if (page === "dashboard") renderDashboard();
-    if (page === "products") ProductManager.renderProductsTable();
-    if (page === "product-form") ProductManager.loadProductForm();
+    if (page === "dashboard") await renderDashboard();
+    if (page === "products") await ProductManager.renderProductsTable();
+    if (page === "product-form") await ProductManager.loadProductForm();
     if (page === "categories") {
-      CategoryManager.renderCategories();
+      await CategoryManager.renderCategories();
       CategoryManager.bindCategoryForm();
     }
     if (page === "orders") OrderManager.renderOrdersTable();

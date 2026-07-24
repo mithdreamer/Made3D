@@ -2,9 +2,8 @@
 
 Nasıl kullanılır?
 Admin girişi için: login.html
-Demo kimlik bilgileri:
-E-posta: admin@3dstore.local
-Şifre: 1234
+Kimlik doğrulama Supabase Auth ile yapılır.
+Admin kullanıcının `app_metadata.role` değeri `admin` olmalıdır.
 Girişten sonra:
 dashboard.html → özet sayfası
 products-admin.html → ürün ekle/düzenle/sil
@@ -23,5 +22,5 @@ admin panelde customers-admin.html sayfasında görüntülenir
 Önemli not
 Bu değişiklikler statik site içinde çalışır:
 
-yönetim paneli localStorage tabanlı demo olarak çalışır
-gerçek üretim için backend / sunucu tabanlı kimlik doğrulama ve veri depolama eklemeniz gerekir
+yönetim paneli Supabase Auth oturumu ve admin rolü ile korunur
+üretim için RLS politikalarının admin role göre uygulanması gerekir
