@@ -1,4 +1,12 @@
 (function () {
+  const MEDIA_BASE_URL =
+      "https://made3d-upload-service.korhanors.workers.dev/media/";
+
+    const getMediaUrl = (objectKey) => {
+      if (!objectKey) return "";
+      return `${MEDIA_BASE_URL}${objectKey}`;
+    };
+
   const getClient = () => {
     if (!window.supabaseClient) {
       throw new Error("Supabase bağlantısı bulunamadı. js/supabase.js dosyasının önce yüklendiğini kontrol edin.");
@@ -33,8 +41,14 @@
     baseUnit: product.base_unit || "adet",
     active: includeInactive ? product.is_active !== false : true,
     featured: Boolean(product.is_featured),
-    images: product.primary_image_url ? [product.primary_image_url] : [],
-    primaryImageUrl: product.primary_image_url || "",
+    images: product.primary_image_object_key
+      ? [getMediaUrl(product.primary_image_object_key)]
+      : product.primary_image_url
+        ? [product.primary_image_url]
+        : [],
+    primaryImageUrl: product.primary_image_object_key
+      ? getMediaUrl(product.primary_image_object_key)
+      : product.primary_image_url || "",
     primaryImageAlt: product.primary_image_alt || product.name || "",
     createdAt: product.created_at || "",
     updatedAt: product.updated_at || product.created_at || ""
