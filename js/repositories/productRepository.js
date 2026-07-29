@@ -1,11 +1,5 @@
 (function () {
-  const MEDIA_BASE_URL =
-      "https://made3d-upload-service.korhanors.workers.dev/media/";
-
-    const getMediaUrl = (objectKey) => {
-      if (!objectKey) return "";
-      return `${MEDIA_BASE_URL}${objectKey}`;
-    };
+  const getMediaUrl = (objectKey) => window.AppConfig?.mediaUrl(objectKey) || "";
 
   const getClient = () => {
     if (!window.supabaseClient) {

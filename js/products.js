@@ -1,12 +1,4 @@
 (function () {
-  const MEDIA_BASE_URL =
-    "https://made3d-upload-service.korhanors.workers.dev/media/";
-
-  const getMediaUrl = (objectKey) => {
-    if (!objectKey) return "";
-    return `${MEDIA_BASE_URL}${objectKey}`;
-  };
-
   const sortProducts = (products, sortBy) => {
     const sorted = [...products];
 
@@ -280,8 +272,16 @@
         return;
       }
 
-      const images =
-        product.images?.length > 0
+      let galleryImages = [];
+      try {
+        galleryImages = await Store.getProductImages(product.id);
+      } catch (error) {
+        console.warn("Urun galerisi yuklenemedi:", error);
+      }
+
+      const images = galleryImages.length
+        ? galleryImages.map((image) => Utils.imageUrl(image.src || image.objectKey))
+        : product.images?.length > 0
           ? product.images.map(Utils.imageUrl)
           : [Utils.getImage(product)];
 
@@ -292,6 +292,7 @@
             src="${images[0]}"
             alt="${Utils.escapeHTML(product.name)}"
             data-main-product-image
+            onerror="this.onerror=null;this.src=Utils.imageFallback()"
           >
 
           <div class="thumb-row">
@@ -303,6 +304,7 @@
                     src="${src}"
                     alt="${Utils.escapeHTML(product.name)} görsel ${index + 1}"
                     data-product-thumb
+                    onerror="this.onerror=null;this.src=Utils.imageFallback()"
                   >
                 `
               )

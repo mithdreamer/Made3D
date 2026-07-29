@@ -1,0 +1,16 @@
+name = "made3d-upload-service"
+main = "src/worker.js"
+compatibility_date = "2026-07-29"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "made3d-media"
+
+[vars]
+MEDIA_BUCKET_NAME = "made3d-media"
+SUPABASE_URL = "https://zkrqlmdouceszgnkxnzh.supabase.co"
+# Keep this in Cloudflare Worker vars/secrets for the Worker runtime.
+# It is not a service-role key and must not be replaced with one.
+SUPABASE_ANON_KEY = "replace-with-supabase-anon-or-publishable-key"
+# Comma-separated origins. Do not use "*".
+ALLOWED_ORIGINS = "http://localhost:8080,https://mithdreamer.github.io"

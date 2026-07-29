@@ -117,11 +117,7 @@
     }
 
     if (!isAdminUser(session.user)) {
-      console.warn("Admin olmayan kullanici engellendi:", {
-        userId: session.user?.id,
-        email: session.user?.email,
-        role: session.user?.app_metadata?.role
-      });
+      console.warn("Admin olmayan kullanici engellendi.");
       await signOut({ redirect: false });
       if (redirect) redirectToLogin("not-admin");
       return null;

@@ -9,7 +9,7 @@
 
   const seed = () => window.ECommerceSeed || {};
   const clone = (value) => (value === undefined ? undefined : JSON.parse(JSON.stringify(value)));
-  const REMOTE_STORE_URL = "/.netlify/functions/store";
+  const REMOTE_STORE_URL = String(window.APP_CONFIG?.REMOTE_STORE_URL || "").trim();
   const REMOTE_KEYS = new Set([KEYS.settings]);
   let remoteAvailable = true;
   let remoteWriteTimer = null;
@@ -132,6 +132,7 @@
   const remoteSupported = () =>
     typeof window.fetch === "function" &&
     window.location.protocol !== "file:" &&
+    Boolean(REMOTE_STORE_URL) &&
     !isLocalStaticHost() &&
     remoteAvailable;
 
@@ -351,6 +352,13 @@
     return window.ProductRepository;
   };
 
+  const requireProductImageRepository = () => {
+    if (!window.ProductImageRepository) {
+      throw new Error("ProductImageRepository yuklenmedi. Script sirasini kontrol edin.");
+    }
+    return window.ProductImageRepository;
+  };
+
   const requireCategoryRepository = () => {
     if (!window.CategoryRepository) {
       throw new Error("CategoryRepository yuklenmedi. Script sirasini kontrol edin.");
@@ -460,6 +468,23 @@
 
   const updateProductStock = async (productId, quantityOrDelta) =>
     requireProductRepository().updateStock(productId, quantityOrDelta);
+
+  const getProductImages = async (productId) => {
+    if (!window.ProductImageRepository) return [];
+    return window.ProductImageRepository.getImagesByProductId(productId);
+  };
+
+  const createProductImages = async (productId, uploadedImages) =>
+    requireProductImageRepository().createProductImages(productId, uploadedImages);
+
+  const setPrimaryProductImage = async (productId, imageId) =>
+    requireProductImageRepository().setPrimaryImage(productId, imageId);
+
+  const updateProductImageOrder = async (productId, orderedImageIds) =>
+    requireProductImageRepository().updateImageOrder(productId, orderedImageIds);
+
+  const deleteProductImage = async (imageId) =>
+    requireProductImageRepository().deleteProductImage(imageId);
 
   const getLineProductId = (line = {}) =>
     line.productId || line.product_id || line.id || line.product?.id || "";
@@ -609,7 +634,14 @@
     };
 
     for (const item of cartItems) {
-      await updateProductStock(item.productId, { delta: -item.quantity });
+      try {
+        await updateProductStock(item.productId, { delta: -item.quantity });
+      } catch (error) {
+        console.warn("Demo siparisi kaydedildi, ancak stok Supabase'de guncellenemedi:", {
+          productId: item.productId,
+          message: error.message
+        });
+      }
     }
 
     saveOrders([order, ...orders]);
@@ -703,6 +735,11 @@
     upsertProduct,
     deleteProduct,
     updateProductStock,
+    getProductImages,
+    createProductImages,
+    setPrimaryProductImage,
+    updateProductImageOrder,
+    deleteProductImage,
     getProductById,
     getProductBySlug,
     getCart,

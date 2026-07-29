@@ -5,7 +5,7 @@
     return `
       <article class="product-card">
         <a class="product-card-image" href="${Utils.productPath(product)}" aria-label="${Utils.escapeHTML(product.name)} detay">
-          <img src="${Utils.getImage(product)}" alt="${Utils.escapeHTML(product.name)}" loading="lazy">
+          <img src="${Utils.getImage(product)}" alt="${Utils.escapeHTML(product.name)}" loading="lazy" onerror="this.onerror=null;this.src=Utils.imageFallback()">
           ${discount ? '<span class="badge product-card-badge">Fırsat</span>' : ""}
         </a>
         <div class="product-card-body">

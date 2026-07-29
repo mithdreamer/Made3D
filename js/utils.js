@@ -59,9 +59,10 @@
 
   const imageUrl = (src) => {
     if (!src) return imageFallback();
-    if (typeof src === "object") return imageUrl(src.url || src.src || "");
+    if (typeof src === "object") return imageUrl(src.url || src.src || window.AppConfig?.mediaUrl(src.objectKey) || "");
     if (/^(data:|blob:|https?:|\/)/i.test(src)) return src;
     if (src.startsWith("assets/")) return `${rootPath()}${src}`;
+    if (window.AppConfig?.mediaUrl(src)) return window.AppConfig.mediaUrl(src);
     return src;
   };
 
@@ -103,6 +104,7 @@
     statusLabel,
     statusClass,
     getCategoryName,
+    imageFallback,
     imageUrl,
     getImage,
     showToast,
