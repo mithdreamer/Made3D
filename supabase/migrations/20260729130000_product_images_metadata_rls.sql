@@ -80,16 +80,36 @@ set
 from duplicate_primary_images dpi
 where pi.id = dpi.id;
 
-create unique index if not exists product_images_one_primary_per_product_idx
-  on public.product_images (product_id)
-  where is_primary = true;
+do $$
+begin
+  if to_regclass('public.product_images_one_primary_per_product_idx') is null
+    and to_regclass('public.ux_product_images_one_primary') is null
+  then
+    execute $index$
+      create unique index product_images_one_primary_per_product_idx
+      on public.product_images (product_id)
+      where is_primary = true
+    $index$;
+  end if;
+end
+$$;
 
 create unique index if not exists product_images_object_key_unique_idx
   on public.product_images (object_key)
   where object_key is not null and object_key <> '';
 
-create index if not exists product_images_product_sort_idx
-  on public.product_images (product_id, sort_order, created_at);
+do $$
+begin
+  if to_regclass('public.product_images_product_sort_idx') is null
+    and to_regclass('public.ix_product_images_product_sort') is null
+  then
+    execute $index$
+      create index product_images_product_sort_idx
+      on public.product_images (product_id, sort_order, created_at)
+    $index$;
+  end if;
+end
+$$;
 
 alter table public.product_images enable row level security;
 
