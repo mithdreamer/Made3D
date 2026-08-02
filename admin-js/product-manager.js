@@ -196,7 +196,7 @@
       if (!container) return;
 
       if (!availableColors.length) {
-        container.innerHTML = `<p class="muted">Aktif renk seçeneği bulunamadı.</p>`;
+        container.innerHTML = `<p class="muted">Renk seçeneği bulunamadı.</p>`;
         return;
       }
 
@@ -223,6 +223,7 @@
                 aria-hidden="true"
               ></span>
               <span>${Utils.escapeHTML(name)}</span>
+              ${color.is_active === false ? `<span class="product-color-inactive-badge">Satışa kapalı</span>` : ""}
               <button
                 class="product-color-star"
                 type="button"
@@ -261,6 +262,7 @@
                   style="background-color: ${Utils.escapeHTML(color.hex_code || "#ffffff")}"
                 ></span>
                 <span class="product-color-option-name">${Utils.escapeHTML(color.name_tr || color.name_en || color.code)}</span>
+                ${color.is_active === false ? `<span class="product-color-inactive-badge">Satışa kapalı</span>` : ""}
                 ${isPrimary ? `<span class="product-color-option-primary">Ana</span>` : ""}
             </label>
           `;
@@ -317,7 +319,7 @@
 
     try {
       await fillCategorySelect();
-      availableColors = await Store.getActiveColors();
+      availableColors = await Store.getAllColors();
 
       const editId = Utils.getParam("id");
       currentProduct = editId ? await Store.getProductById(editId, { includeInactive: true }) : null;

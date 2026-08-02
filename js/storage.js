@@ -496,6 +496,12 @@
   const getActiveColors = async () =>
   requireProductColorRepository().getActiveColors();
 
+  const getAllColors = async () =>
+  requireProductColorRepository().getAllColors();
+
+  const updateColorActiveStatus = async (colorCode, isActive) =>
+  requireProductColorRepository().updateColorActiveStatus(colorCode, isActive);
+
   const getProductColors = async (productId) =>
   requireProductColorRepository().getProductColors(productId);
 
@@ -756,7 +762,9 @@
     setPrimaryProductImage,
     updateProductImageOrder,
     deleteProductImage,
+    getAllColors,
     getActiveColors,
+    updateColorActiveStatus,
     getProductColors,
     replaceProductColors,
     getProductById,

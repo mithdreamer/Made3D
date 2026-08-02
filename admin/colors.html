@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Renk Yönetimi | MAde3D</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../components/admin-sidebar/admin-sidebar.css">
+  </head>
+  <body class="admin-body" data-admin-page="colors">
+    <div class="admin-shell">
+      <div data-component="admin-sidebar"></div>
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <span class="badge">Filament renkleri</span>
+            <h1>Renk Yönetimi</h1>
+            <p class="muted">Bir rengi satışa kapatmak ürün bağlantılarını silmez. Renk, yeniden açıldığında bağlı ürünlerde tekrar sunulur.</p>
+          </div>
+        </header>
+
+        <section class="color-management-toolbar" aria-label="Renk filtreleri">
+          <strong id="colorsSummary">Renkler yükleniyor...</strong>
+          <label class="field color-status-filter" for="colorStatusFilter">
+            <span>Duruma göre filtrele</span>
+            <select id="colorStatusFilter">
+              <option value="all">Tüm renkler</option>
+              <option value="active">Satışa açık</option>
+              <option value="inactive">Satışa kapalı</option>
+            </select>
+          </label>
+        </section>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Renk</th>
+                <th>Türkçe ad</th>
+                <th>İngilizce ad</th>
+                <th>Kod</th>
+                <th>HEX</th>
+                <th>Satış durumu</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="colorsTableBody">
+              <tr><td colspan="7"><div class="empty-state"><p>Renkler yükleniyor...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../admin-js/auth.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/repositories/productColorRepository.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../components/admin-sidebar/admin-sidebar.js"></script>
+    <script src="../admin-js/color-manager.js"></script>
+    <script src="../admin-js/admin-app.js"></script>
+  </body>
+</html>

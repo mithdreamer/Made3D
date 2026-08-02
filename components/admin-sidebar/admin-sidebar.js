@@ -18,6 +18,7 @@
           ${item(Utils.adminPath("index.html"), "Dashboard", "dashboard")}
           ${item(Utils.adminPath("products.html"), "Ürünler", "products")}
           ${item(Utils.adminPath("categories.html"), "Kategoriler", "categories")}
+          ${item(Utils.adminPath("colors.html"), "Renk Yönetimi", "colors")}
           ${item(Utils.adminPath("messages.html"), "Mesajlar", "messages")}
           ${item(Utils.adminPath("orders.html"), "Siparişler", "orders")}
           ${item(Utils.adminPath("payment-settings.html"), "Ödeme", "payment-settings")}

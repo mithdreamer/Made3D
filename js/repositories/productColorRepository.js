@@ -33,6 +33,41 @@
     return data || [];
   };
 
+  const getAllColors = async () => {
+    const { data, error } = await getClient()
+      .from("color_master")
+      .select("code, name_en, name_tr, hex_code, display_order, is_active")
+      .order("display_order", { ascending: true });
+
+    if (error) {
+      logSupabaseError("Renkler alınamadı:", error);
+      throw new Error("Renk listesi yüklenirken bir hata oluştu.");
+    }
+
+    return data || [];
+  };
+
+  const updateColorActiveStatus = async (colorCode, isActive) => {
+    if (!colorCode) {
+      throw new Error("Güncellenecek renk bulunamadı.");
+    }
+
+    const { error } = await getClient()
+      .from("color_master")
+      .update({ is_active: Boolean(isActive) })
+      .eq("code", colorCode);
+
+    if (error) {
+      logSupabaseError("Renk satış durumu güncellenemedi:", error);
+      throw new Error("Rengin satış durumu güncellenirken bir hata oluştu.");
+    }
+
+    return {
+      code: colorCode,
+      is_active: Boolean(isActive)
+    };
+  };
+
   const getProductColors = async (productId) => {
     if (!productId) {
       return [];
@@ -134,7 +169,9 @@
   };
 
   window.ProductColorRepository = {
+    getAllColors,
     getActiveColors,
+    updateColorActiveStatus,
     getProductColors,
     replaceProductColors
   };

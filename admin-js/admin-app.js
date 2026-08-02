@@ -115,6 +115,7 @@
       await CategoryManager.renderCategories();
       CategoryManager.bindCategoryForm();
     }
+    if (page === "colors") await ColorManager.init();
     if (page === "orders") OrderManager.renderOrdersTable();
     if (page === "order-detail") OrderManager.renderOrderDetail();
     if (page === "settings") bindSettings();

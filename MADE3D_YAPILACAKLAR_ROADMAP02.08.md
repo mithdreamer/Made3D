@@ -30,24 +30,27 @@ Bu dosya, Made3D projesinde kaldığımız noktayı ve sıradaki işleri unutmam
 - Etiketlerde yıldızla ana renk seçme ve `×` ile kaldırma davranışı eklendi.
 - Panel dışına tıklama ve `Esc` tuşuyla kapatma davranışı eklendi.
 - Açılır panel mobil görünümde tek sütuna geçecek şekilde düzenlendi.
+- Seçilen renkler ürün kaydından sonra `product_colors` tablosuna yazılacak şekilde kayıt akışına bağlandı.
+- Renk kaydı başarısız olduğunda ürünün kaydedildiğini, ancak renklerin tamamlanamadığını belirten uyarı eklendi.
+- Yeni ve mevcut ürün renklerinin Supabase'e kaydedilmesi doğrulandı.
+- Admin paneline **Renk Yönetimi** ekranı eklendi.
+- Renkler `color_master.is_active` üzerinden satışa açılıp kapatılabiliyor.
+- Ürün formları aktif/pasif tüm renkleri göstermeye devam ediyor.
+- Pasif renkler admin ürün formunda seçilebilir ve **Satışa kapalı** rozetiyle ayırt edilebilir.
+- Renk Yönetimi ekranına satış durumu filtresi ve özet sayaçları eklendi.
+- `color_master` için admin güncelleme RLS migration'ı hazırlandı.
 
-### Devam eden iş: ürün renk sistemi
+### Tamamlanan hedef: Genel Renk Yönetimi
 
-Renk sistemi henüz tamamlanmış sayılmamalıdır. Kompakt seçim arayüzü hazırdır; seçimlerin veritabanına kaydedilmesi henüz bağlanmadı.
+Admin, renkleri satışa açıp kapatabilir. Bu işlem yalnızca `color_master.is_active` değerini değiştirir; mevcut `product_colors` bağlantılarını silmez. Admin ürün formunda bütün renkler seçilebilir kalır.
 
-Sıradaki sıra:
+### Sıradaki hedef: Public ürün sayfasında renk seçenekleri
 
-1. Seçimleri ürün kaydından sonra şu çağrıyla veritabanına yaz:
-
-   ```javascript
-   await Store.replaceProductColors(saved.id, selectedColors);
-   ```
-
-2. Renk kayıt hatasında ürünün kaydedildiğini, fakat renklerin tamamlanamadığını belirten anlaşılır uyarı göster.
-3. Yeni ürün oluşturma testi yap.
-4. Mevcut ürünü düzenleme ve kayıtlı renkleri geri yükleme testi yap.
-5. Ana renk değiştirme, renk kaldırma ve sıralama testlerini yap.
-6. Sayfa yenilendiğinde renklerin doğru kaldığını doğrula.
+1. Ürüne bağlı renkleri public ürün detayında göster.
+2. Yalnızca `is_active = true` olan renkleri müşteriye sun.
+3. Ana rengi varsayılan seçili getir.
+4. Seçilen rengi sepet satırına taşı.
+5. Pasif rengin yeni sepete/siparişe eklenmesini engelle.
 
 ## Renk sistemi kabul kriterleri
 
@@ -106,7 +109,7 @@ Sıradaki sıra:
 
 ## Bir sonraki çalışma oturumu
 
-İlk iş, `replaceProductColors()` çağrısını ürün kayıt akışına bağlamaktır. Ardından yeni ürün, mevcut ürün, hata mesajı ve sayfa yenileme senaryoları test edilecektir.
+İlk iş, Supabase SQL Editor'da `20260802193000_color_master_admin_update.sql` dosyasını çalıştırıp Renk Yönetimi ekranında bir rengi satışa kapatma ve yeniden açma senaryosunu doğrulamaktır. Ardından public ürün detayında aktif renkleri göstermeye geçilecektir.
 
 ## Commit kontrol listesi
 
@@ -121,14 +124,10 @@ Commit atmadan önce:
 - [ ] `git diff` ile yarım veya yanlış yapıştırılmış kod bulunmadığını kontrol et.
 - [ ] Testleri çalıştır.
 
-## Bugünkü commit kararı
+## Bu feature için commit kararı
 
-Bu aşama, **tamamlanmış renk özelliği olarak commit edilmemelidir**; çünkü seçimler henüz `product_colors` tablosuna kaydedilmiyor.
-
-Ancak yorulduğun için mevcut emeği güvenli biçimde saklamak amacıyla **ara çalışma/WIP commit'i** atılabilir. Önerilen mesaj:
+RLS migration'ı çalıştırılıp satışa aç/kapat testi başarıyla tamamlandıktan sonra önerilen mesaj:
 
 ```text
-wip: add product color selection foundation
+feat: add admin color availability management
 ```
-
-Bu commit'i doğrudan tamamlanmış özellik olarak üretime yayımlamamak gerekir. Bir sonraki oturumda bu roadmap esas alınarak renk arayüzü ve veritabanı kaydı tamamlanmalıdır.
