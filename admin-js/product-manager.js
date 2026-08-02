@@ -188,6 +188,7 @@
     let currentProduct = null;
     let availableColors = [];
     let selectedColors = [];
+    let colorPanelOpen = false;
 
     const renderColorOptions = () => {
       const container = document.querySelector("#productColorOptions");
@@ -203,15 +204,53 @@
         selectedColors.map((color) => [color.color_code, color])
       );
 
-      container.innerHTML = availableColors
+      const colorByCode = new Map(
+        availableColors.map((color) => [color.code, color])
+      );
+
+      const selectedChips = selectedColors
+        .map((selectedColor) => {
+          const color = colorByCode.get(selectedColor.color_code);
+          if (!color) return "";
+          const name = color.name_tr || color.name_en || color.code;
+          const isPrimary = Boolean(selectedColor.is_primary);
+
+          return `
+            <span class="product-color-chip ${isPrimary ? "is-primary" : ""}">
+              <span
+                class="product-color-swatch"
+                style="background-color: ${Utils.escapeHTML(color.hex_code || "#ffffff")}"
+                aria-hidden="true"
+              ></span>
+              <span>${Utils.escapeHTML(name)}</span>
+              <button
+                class="product-color-star"
+                type="button"
+                data-color-make-primary="${Utils.escapeHTML(color.code)}"
+                aria-label="${Utils.escapeHTML(name)} rengini ana renk yap"
+                title="${isPrimary ? "Ana renk" : "Ana renk yap"}"
+              >${isPrimary ? "★" : "☆"}</button>
+              ${isPrimary ? `<span class="product-color-primary-badge">Ana</span>` : ""}
+              <button
+                class="product-color-remove"
+                type="button"
+                data-color-remove="${Utils.escapeHTML(color.code)}"
+                aria-label="${Utils.escapeHTML(name)} rengini kaldır"
+                title="Rengi kaldır"
+              >×</button>
+            </span>
+          `;
+        })
+        .join("");
+
+      const colorChoices = availableColors
         .map((color) => {
           const selectedColor = selectedByCode.get(color.code);
           const isSelected = Boolean(selectedColor);
           const isPrimary = Boolean(selectedColor?.is_primary);
 
           return `
-            <div class="product-color-option">
-              <label class="product-color-select">
+            <label class="product-color-option ${isSelected ? "is-selected" : ""}">
                 <input
                   type="checkbox"
                   data-color-select="${Utils.escapeHTML(color.code)}"
@@ -221,23 +260,37 @@
                   class="product-color-swatch"
                   style="background-color: ${Utils.escapeHTML(color.hex_code || "#ffffff")}"
                 ></span>
-                <span>${Utils.escapeHTML(color.name_tr || color.name_en || color.code)}</span>
-              </label>
-
-              <label class="product-color-primary">
-                <input
-                  type="radio"
-                  name="primaryProductColor"
-                  data-color-primary="${Utils.escapeHTML(color.code)}"
-                  ${isPrimary ? "checked" : ""}
-                  ${isSelected ? "" : "disabled"}
-                >
-                Ana renk
-              </label>
-            </div>
+                <span class="product-color-option-name">${Utils.escapeHTML(color.name_tr || color.name_en || color.code)}</span>
+                ${isPrimary ? `<span class="product-color-option-primary">Ana</span>` : ""}
+            </label>
           `;
         })
         .join("");
+
+      container.innerHTML = `
+        <div class="product-color-summary">
+          <div class="product-color-chips">
+            ${selectedChips || `<span class="product-color-empty">Henüz renk seçilmedi.</span>`}
+          </div>
+          <button
+            class="btn btn-outline product-color-toggle"
+            type="button"
+            data-color-toggle
+            aria-expanded="${colorPanelOpen}"
+            aria-controls="productColorPanel"
+          >
+            <span>+ Renk seç</span>
+            <span class="product-color-chevron" aria-hidden="true">${colorPanelOpen ? "▲" : "▼"}</span>
+          </button>
+        </div>
+        <div
+          class="product-color-panel"
+          id="productColorPanel"
+          ${colorPanelOpen ? "" : "hidden"}
+        >
+          ${colorChoices}
+        </div>
+      `;
 
       if (errorNode) {
         errorNode.hidden = true;
@@ -308,7 +361,6 @@
         .querySelector("#productColorOptions")
         ?.addEventListener("change", (event) => {
           const selectInput = event.target.closest("[data-color-select]");
-          const primaryInput = event.target.closest("[data-color-primary]");
 
           if (selectInput) {
             const colorCode = selectInput.dataset.colorSelect;
@@ -345,20 +397,64 @@
             });
 
             renderColorOptions();
+          }
+        });
+
+      document
+        .querySelector("#productColorOptions")
+        ?.addEventListener("click", (event) => {
+          const toggle = event.target.closest("[data-color-toggle]");
+          const remove = event.target.closest("[data-color-remove]");
+          const makePrimary = event.target.closest("[data-color-make-primary]");
+
+          if (toggle) {
+            colorPanelOpen = !colorPanelOpen;
+            renderColorOptions();
             return;
           }
 
-          if (primaryInput && primaryInput.checked) {
-            const colorCode = primaryInput.dataset.colorPrimary;
+          if (remove) {
+            const colorCode = remove.dataset.colorRemove;
+            const removedColor = selectedColors.find((color) => color.color_code === colorCode);
+            selectedColors = selectedColors.filter((color) => color.color_code !== colorCode);
+            if (removedColor?.is_primary && selectedColors.length) {
+              selectedColors[0].is_primary = true;
+            }
+            selectedColors.forEach((color, index) => {
+              color.display_order = index;
+            });
+            renderColorOptions();
+            return;
+          }
 
+          if (makePrimary) {
+            const colorCode = makePrimary.dataset.colorMakePrimary;
             selectedColors = selectedColors.map((color) => ({
               ...color,
               is_primary: color.color_code === colorCode
             }));
-
             renderColorOptions();
           }
         });
+
+      document.addEventListener("click", (event) => {
+        const container = document.querySelector("#productColorOptions");
+        // renderColorOptions() replaces the picker's inner HTML. After the
+        // toggle is clicked, event.target can therefore be detached before
+        // this document-level handler runs. The event path still preserves
+        // where the click originated, so use it for the outside-click check.
+        const clickedInsidePicker = event.composedPath().includes(container);
+        if (!colorPanelOpen || !container || clickedInsidePicker) return;
+        colorPanelOpen = false;
+        renderColorOptions();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || !colorPanelOpen) return;
+        colorPanelOpen = false;
+        renderColorOptions();
+        document.querySelector("[data-color-toggle]")?.focus();
+      });
 
       const fileInput = document.querySelector("#imageFiles");
       fileInput?.addEventListener("change", () => {
@@ -423,6 +519,14 @@
             window.history.replaceState({}, "", `${Utils.adminPath("edit-product.html")}?id=${saved.id}`);
           }
 
+          let databaseColorError = null;
+          try {
+            await Store.replaceProductColors(saved.id, selectedColors);
+          } catch (error) {
+            databaseColorError = error;
+            console.error("Urun renkleri kaydedilemedi:", error);
+          }
+
           showFormMessage(form, "Gorseller yukleniyor.", "info");
           const uploadResult = await ImageUpload.uploadPendingImages(imageItems, saved.id, {
             onChange: setFormImages
@@ -472,16 +576,33 @@
           await Store.getProducts({ includeInactive: true });
           await Store.syncRemoteCatalog?.();
 
-          if (uploadResult.failed.length || imageStateResult.failed.length || databaseImageError) {
+          if (
+            databaseColorError ||
+            uploadResult.failed.length ||
+            imageStateResult.failed.length ||
+            databaseImageError
+          ) {
             const failedNames = [
               ...uploadResult.failed,
               ...imageStateResult.failed
             ]
               .map((item) => item.originalName || item.objectKey || "gorsel")
               .filter(Boolean);
-            const message = failedNames.length
-              ? `Urun kaydedildi, ancak su gorseller tamamlanamadi: ${failedNames.join(", ")}. Tekrar kaydedebilirsiniz.`
-              : `Urun kaydedildi, ancak bazi gorsel islemleri tamamlanamadi. ${databaseImageError?.message || "Tekrar kaydedebilirsiniz."}`;
+            const incompleteParts = [];
+            if (databaseColorError) incompleteParts.push("renkler");
+            if (uploadResult.failed.length || imageStateResult.failed.length || databaseImageError) {
+              incompleteParts.push("gorseller");
+            }
+
+            const details = [];
+            if (databaseColorError?.message) details.push(databaseColorError.message);
+            if (failedNames.length) {
+              details.push(`Tamamlanamayan gorseller: ${failedNames.join(", ")}.`);
+            } else if (databaseImageError?.message) {
+              details.push(databaseImageError.message);
+            }
+
+            const message = `Urun kaydedildi, ancak ${incompleteParts.join(" ve ")} tamamlanamadi. ${details.join(" ")} Tekrar kaydedebilirsiniz.`;
             showFormMessage(form, message, "warning");
             Utils.showToast(message);
             return;

@@ -25,31 +25,29 @@ Bu dosya, Made3D projesinde kaldığımız noktayı ve sıradaki işleri unutmam
 - Birden fazla renk seçilebiliyor.
 - İlk seçilen renk otomatik olarak ana renk oluyor.
 - Ana renk değiştirilebiliyor; ana renk kaldırılırsa ilk seçili renk ana renk oluyor.
+- Geniş renk listesi kompakt, açılır çoklu seçim paneline dönüştürüldü.
+- Seçilen renkler renk örneği ve adıyla etiketler halinde gösteriliyor.
+- Etiketlerde yıldızla ana renk seçme ve `×` ile kaldırma davranışı eklendi.
+- Panel dışına tıklama ve `Esc` tuşuyla kapatma davranışı eklendi.
+- Açılır panel mobil görünümde tek sütuna geçecek şekilde düzenlendi.
 
 ### Devam eden iş: ürün renk sistemi
 
-Renk sistemi henüz tamamlanmış sayılmamalıdır. Şu anda seçimler ekranda çalışıyor ancak arayüz fazla yer kaplıyor ve seçimlerin veritabanına kaydedilmesi henüz bağlanmadı.
+Renk sistemi henüz tamamlanmış sayılmamalıdır. Kompakt seçim arayüzü hazırdır; seçimlerin veritabanına kaydedilmesi henüz bağlanmadı.
 
 Sıradaki sıra:
 
-1. Mevcut geniş renk listesini kompakt, açılır çoklu seçim paneline dönüştür.
-2. Seçilen renkleri küçük etiketler halinde göster.
-3. Etiket üzerinde yıldız ile ana renk belirleme davranışını ekle.
-4. Etiketteki kaldırma düğmesiyle rengi seçimden çıkar.
-5. Panel dışında tıklanınca açılır paneli kapat.
-6. Klavye ve erişilebilirlik davranışlarını kontrol et.
-7. Gerekli CSS'i mobil görünümle birlikte tamamla.
-8. Seçimleri ürün kaydından sonra şu çağrıyla veritabanına yaz:
+1. Seçimleri ürün kaydından sonra şu çağrıyla veritabanına yaz:
 
    ```javascript
    await Store.replaceProductColors(saved.id, selectedColors);
    ```
 
-9. Renk kayıt hatasında ürünün kaydedildiğini, fakat renklerin tamamlanamadığını belirten anlaşılır uyarı göster.
-10. Yeni ürün oluşturma testi yap.
-11. Mevcut ürünü düzenleme ve kayıtlı renkleri geri yükleme testi yap.
-12. Ana renk değiştirme, renk kaldırma ve sıralama testlerini yap.
-13. Sayfa yenilendiğinde renklerin doğru kaldığını doğrula.
+2. Renk kayıt hatasında ürünün kaydedildiğini, fakat renklerin tamamlanamadığını belirten anlaşılır uyarı göster.
+3. Yeni ürün oluşturma testi yap.
+4. Mevcut ürünü düzenleme ve kayıtlı renkleri geri yükleme testi yap.
+5. Ana renk değiştirme, renk kaldırma ve sıralama testlerini yap.
+6. Sayfa yenilendiğinde renklerin doğru kaldığını doğrula.
 
 ## Renk sistemi kabul kriterleri
 
@@ -108,7 +106,7 @@ Sıradaki sıra:
 
 ## Bir sonraki çalışma oturumu
 
-İlk iş, renk seçimi HTML yapısını kompakt açılır panel ve seçili renk etiketleri biçimine çevirmektir. Ardından `renderColorOptions()` ve mevcut `change` olayı yeni arayüze uyarlanacaktır. Arayüz doğrulandıktan sonra `replaceProductColors()` kayıt akışına bağlanacaktır.
+İlk iş, `replaceProductColors()` çağrısını ürün kayıt akışına bağlamaktır. Ardından yeni ürün, mevcut ürün, hata mesajı ve sayfa yenileme senaryoları test edilecektir.
 
 ## Commit kontrol listesi
 
@@ -125,7 +123,7 @@ Commit atmadan önce:
 
 ## Bugünkü commit kararı
 
-Bu aşama, **tamamlanmış renk özelliği olarak commit edilmemelidir**; çünkü seçimler henüz `product_colors` tablosuna kaydedilmiyor ve arayüz yeniden düzenlenecek.
+Bu aşama, **tamamlanmış renk özelliği olarak commit edilmemelidir**; çünkü seçimler henüz `product_colors` tablosuna kaydedilmiyor.
 
 Ancak yorulduğun için mevcut emeği güvenli biçimde saklamak amacıyla **ara çalışma/WIP commit'i** atılabilir. Önerilen mesaj:
 
