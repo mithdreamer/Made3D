@@ -186,6 +186,64 @@
     let imageItems = [];
     let originalImageIds = new Set();
     let currentProduct = null;
+    let availableColors = [];
+    let selectedColors = [];
+
+    const renderColorOptions = () => {
+      const container = document.querySelector("#productColorOptions");
+      const errorNode = document.querySelector("#productColorError");
+      if (!container) return;
+
+      if (!availableColors.length) {
+        container.innerHTML = `<p class="muted">Aktif renk seçeneği bulunamadı.</p>`;
+        return;
+      }
+
+      const selectedByCode = new Map(
+        selectedColors.map((color) => [color.color_code, color])
+      );
+
+      container.innerHTML = availableColors
+        .map((color) => {
+          const selectedColor = selectedByCode.get(color.code);
+          const isSelected = Boolean(selectedColor);
+          const isPrimary = Boolean(selectedColor?.is_primary);
+
+          return `
+            <div class="product-color-option">
+              <label class="product-color-select">
+                <input
+                  type="checkbox"
+                  data-color-select="${Utils.escapeHTML(color.code)}"
+                  ${isSelected ? "checked" : ""}
+                >
+                <span
+                  class="product-color-swatch"
+                  style="background-color: ${Utils.escapeHTML(color.hex_code || "#ffffff")}"
+                ></span>
+                <span>${Utils.escapeHTML(color.name_tr || color.name_en || color.code)}</span>
+              </label>
+
+              <label class="product-color-primary">
+                <input
+                  type="radio"
+                  name="primaryProductColor"
+                  data-color-primary="${Utils.escapeHTML(color.code)}"
+                  ${isPrimary ? "checked" : ""}
+                  ${isSelected ? "" : "disabled"}
+                >
+                Ana renk
+              </label>
+            </div>
+          `;
+        })
+        .join("");
+
+      if (errorNode) {
+        errorNode.hidden = true;
+        errorNode.textContent = "";
+      }
+    };
 
     const setFormImages = (items) => {
       imageItems = ImageUpload.ensurePrimary(items).slice(0, ImageUpload.maxImages());
@@ -206,6 +264,7 @@
 
     try {
       await fillCategorySelect();
+      availableColors = await Store.getActiveColors();
 
       const editId = Utils.getParam("id");
       currentProduct = editId ? await Store.getProductById(editId, { includeInactive: true }) : null;
@@ -231,6 +290,75 @@
         form.elements.active.checked = true;
         setFormImages([]);
       }
+      if (currentProduct) {
+        const productColors = await Store.getProductColors(currentProduct.id);
+
+        selectedColors = productColors.map((color, index) => ({
+          color_code: color.color_code,
+          is_primary: Boolean(color.is_primary),
+          display_order: Number(color.display_order ?? index)
+        }));
+      } else {
+        selectedColors = [];
+      }
+
+      renderColorOptions();
+
+      document
+        .querySelector("#productColorOptions")
+        ?.addEventListener("change", (event) => {
+          const selectInput = event.target.closest("[data-color-select]");
+          const primaryInput = event.target.closest("[data-color-primary]");
+
+          if (selectInput) {
+            const colorCode = selectInput.dataset.colorSelect;
+
+            if (selectInput.checked) {
+              const hasPrimaryColor = selectedColors.some(
+                (color) => color.is_primary
+              );
+
+              selectedColors.push({
+                color_code: colorCode,
+                is_primary: !hasPrimaryColor,
+                display_order: selectedColors.length
+              });
+            } else {
+              const removedColor = selectedColors.find(
+                (color) => color.color_code === colorCode
+              );
+
+              selectedColors = selectedColors.filter(
+                (color) => color.color_code !== colorCode
+              );
+
+              if (
+                removedColor?.is_primary &&
+                selectedColors.length > 0
+              ) {
+                selectedColors[0].is_primary = true;
+              }
+            }
+
+            selectedColors.forEach((color, index) => {
+              color.display_order = index;
+            });
+
+            renderColorOptions();
+            return;
+          }
+
+          if (primaryInput && primaryInput.checked) {
+            const colorCode = primaryInput.dataset.colorPrimary;
+
+            selectedColors = selectedColors.map((color) => ({
+              ...color,
+              is_primary: color.color_code === colorCode
+            }));
+
+            renderColorOptions();
+          }
+        });
 
       const fileInput = document.querySelector("#imageFiles");
       fileInput?.addEventListener("change", () => {

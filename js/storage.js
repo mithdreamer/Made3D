@@ -359,6 +359,14 @@
     return window.ProductImageRepository;
   };
 
+  const requireProductColorRepository = () => {
+  if (!window.ProductColorRepository) {
+    throw new Error("ProductColorRepository yuklenmedi. Script sirasini kontrol edin.");
+  }
+
+  return window.ProductColorRepository;
+  };
+
   const requireCategoryRepository = () => {
     if (!window.CategoryRepository) {
       throw new Error("CategoryRepository yuklenmedi. Script sirasini kontrol edin.");
@@ -485,6 +493,14 @@
 
   const deleteProductImage = async (imageId) =>
     requireProductImageRepository().deleteProductImage(imageId);
+  const getActiveColors = async () =>
+  requireProductColorRepository().getActiveColors();
+
+  const getProductColors = async (productId) =>
+  requireProductColorRepository().getProductColors(productId);
+
+  const replaceProductColors = async (productId, colors) =>
+  requireProductColorRepository().replaceProductColors(productId, colors);
 
   const getLineProductId = (line = {}) =>
     line.productId || line.product_id || line.id || line.product?.id || "";
@@ -740,6 +756,9 @@
     setPrimaryProductImage,
     updateProductImageOrder,
     deleteProductImage,
+    getActiveColors,
+    getProductColors,
+    replaceProductColors,
     getProductById,
     getProductBySlug,
     getCart,

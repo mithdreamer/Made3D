@@ -53,6 +53,20 @@
               <textarea id="description" name="description"></textarea>
             </div>
             <div class="field full-span">
+              <label>Ürün renkleri</label>
+              <p class="field-help">
+                Ürünün mevcut renklerini seçin. Seçilen renklerden birini ana renk olarak belirleyin.
+              </p>
+
+              <div
+                class="product-color-grid"
+                id="productColorOptions"
+                aria-live="polite"
+              ></div>
+
+              <p class="field-error" id="productColorError" hidden></p>
+            </div>
+            <div class="field full-span">
               <label for="imageFiles">Ürün fotoğrafları</label>
               <input id="imageFiles" type="file" accept="image/*" multiple>
               <input id="productImages" name="productImages" type="hidden" value="[]">
@@ -84,6 +98,7 @@
     <script src="../js/storage.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../components/admin-sidebar/admin-sidebar.js"></script>
+    <script src="../js/repositories/productColorRepository.js"></script>
     <script src="../admin-js/image-upload.js"></script>
     <script src="../admin-js/product-manager.js"></script>
     <script src="../admin-js/category-manager.js"></script>

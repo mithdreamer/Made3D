@@ -203,7 +203,7 @@
     ) {
       const currentProduct = await getProductById(productId, { includeInactive: true });
       if (!currentProduct) {
-        throw new Error("Stok gÃ¼ncellenecek Ã¼rÃ¼n bulunamadÄ±.");
+        throw new Error("Stok güncellenecek ürün bulunamadı.");
       }
       nextStock = Math.max(0, (Number(currentProduct.stock) || 0) + (Number(quantityOrDelta.delta) || 0));
     } else {
