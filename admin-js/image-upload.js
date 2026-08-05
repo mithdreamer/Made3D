@@ -194,7 +194,11 @@
 
   const uploadPendingImages = async (items, productId, callbacks = {}) => {
     const nextItems = [...items];
-    const pending = nextItems.filter((item) => ["pending", "error"].includes(item.status) && item.file);
+    const isReadableFile = (file) =>
+      typeof File !== "undefined" && file instanceof File && file.size >= 0;
+    const pending = nextItems.filter(
+      (item) => ["pending", "error"].includes(item.status) && isReadableFile(item.file)
+    );
     const uploaded = [];
     const failed = [];
 
@@ -306,6 +310,10 @@
       addButton("Yukari", "up", index === 0);
       addButton("Asagi", "down", index === items.length - 1);
       addButton("Kaldir", "remove");
+
+      if (item.status === "error" && !item.file) {
+        addButton("Dosyayi yeniden sec", "replace-file");
+      }
 
       card.appendChild(media);
       card.appendChild(body);

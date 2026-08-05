@@ -189,6 +189,7 @@
     let availableColors = [];
     let selectedColors = [];
     let colorPanelOpen = false;
+    let replacingImageId = "";
 
     const renderColorOptions = () => {
       const container = document.querySelector("#productColorOptions");
@@ -460,9 +461,27 @@
 
       const fileInput = document.querySelector("#imageFiles");
       fileInput?.addEventListener("change", () => {
-        const { items, errors } = ImageUpload.createPendingItems(fileInput.files, imageItems);
+        const replacementIndex = replacingImageId
+          ? imageItems.findIndex((item) => ImageUpload.itemKey(item) === replacingImageId)
+          : -1;
+        const baseItems = replacementIndex >= 0
+          ? imageItems.filter((_, index) => index !== replacementIndex)
+          : imageItems;
+        const { items, errors } = ImageUpload.createPendingItems(fileInput.files, baseItems);
         if (errors.length) Utils.showToast(errors.join(" "));
-        setFormImages([...imageItems, ...items]);
+        if (replacementIndex >= 0 && items.length) {
+          const nextItems = [...imageItems];
+          nextItems.splice(replacementIndex, 1, {
+            ...items[0],
+            sortOrder: replacementIndex,
+            isPrimary: Boolean(imageItems[replacementIndex]?.isPrimary)
+          });
+          if (items.length > 1) nextItems.push(...items.slice(1));
+          setFormImages(nextItems);
+        } else if (items.length) {
+          setFormImages([...imageItems, ...items]);
+        }
+        replacingImageId = "";
         fileInput.value = "";
       });
 
@@ -482,6 +501,10 @@
         if (action === "remove") {
           setFormImages(imageItems.filter((item) => ImageUpload.itemKey(item) !== imageId));
         }
+        if (action === "replace-file") {
+          replacingImageId = imageId;
+          fileInput?.click();
+        }
       });
 
       document.querySelector("#clearImages")?.addEventListener("click", () => setFormImages([]));
@@ -500,6 +523,41 @@
             submit.textContent = "Kaydediliyor...";
           }
           showFormMessage(form, "Urun kaydediliyor.", "info");
+
+          const submittedName = String(data.get("name") || "").trim();
+          const submittedSku = String(data.get("sku") || "").trim();
+
+          if (!currentProduct && submittedSku) {
+            const existingProduct = await Store.getProductBySku(submittedSku, {
+              includeInactive: true
+            });
+
+            if (existingProduct) {
+              const normalizeName = (value) => String(value || "")
+                .trim()
+                .toLocaleLowerCase("tr-TR");
+
+              if (normalizeName(existingProduct.name) !== normalizeName(submittedName)) {
+                const duplicateError = new Error(
+                  `Bu ürün kodu ${existingProduct.name} ürününde kullanılıyor. Mevcut ürünü düzenleyin veya farklı bir ürün kodu girin.`
+                );
+                duplicateError.field = "sku";
+                throw duplicateError;
+              }
+
+              currentProduct = existingProduct;
+              window.history.replaceState(
+                {},
+                "",
+                `${Utils.adminPath("edit-product.html")}?id=${existingProduct.id}`
+              );
+              showFormMessage(
+                form,
+                "Daha önce oluşturulan ürün kaydı bulundu. Mevcut kayıt güncelleniyor.",
+                "info"
+              );
+            }
+          }
 
           const saved = await Store.upsertProduct({
             id: currentProduct?.id,
@@ -535,6 +593,21 @@
           });
           setFormImages(uploadResult.items);
 
+          const missingFileItems = imageItems.filter(
+            (item) => ["pending", "error"].includes(item.status) && !item.file
+          );
+          if (missingFileItems.length) {
+            setFormImages(imageItems.map((item) =>
+              missingFileItems.includes(item)
+                ? {
+                    ...item,
+                    status: "error",
+                    error: "Dosya baglantisi kayboldu. Dosyayi yeniden secin."
+                  }
+                : item
+            ));
+          }
+
           let databaseImageError = null;
           let imageStateResult = { images: [], failed: [] };
           try {
@@ -548,7 +621,7 @@
             const retryableImages = imageItems
               .filter((item) => {
                 const key = ImageUpload.itemKey(item) || item.objectKey;
-                return (["pending", "error"].includes(item.status) && item.file) || metadataFailureKeys.has(key);
+                return ["pending", "error"].includes(item.status) || metadataFailureKeys.has(key);
               })
               .map((item) => {
                 const key = ImageUpload.itemKey(item) || item.objectKey;
@@ -581,6 +654,7 @@
           if (
             databaseColorError ||
             uploadResult.failed.length ||
+            missingFileItems.length ||
             imageStateResult.failed.length ||
             databaseImageError
           ) {
@@ -592,7 +666,7 @@
               .filter(Boolean);
             const incompleteParts = [];
             if (databaseColorError) incompleteParts.push("renkler");
-            if (uploadResult.failed.length || imageStateResult.failed.length || databaseImageError) {
+            if (uploadResult.failed.length || missingFileItems.length || imageStateResult.failed.length || databaseImageError) {
               incompleteParts.push("gorseller");
             }
 
@@ -600,6 +674,8 @@
             if (databaseColorError?.message) details.push(databaseColorError.message);
             if (failedNames.length) {
               details.push(`Tamamlanamayan gorseller: ${failedNames.join(", ")}.`);
+            } else if (missingFileItems.length) {
+              details.push("Dosya baglantisi kaybolan gorselleri yeniden secin.");
             } else if (databaseImageError?.message) {
               details.push(databaseImageError.message);
             }

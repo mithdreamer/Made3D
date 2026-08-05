@@ -1,10 +1,10 @@
 (function () {
-  const renderOrderSuccess = () => {
+  const renderOrderSuccess = async () => {
     const container = document.querySelector("#orderSuccess");
     if (!container) return;
 
     const orderId = Utils.getParam("order");
-    const order = Store.getOrderById(orderId);
+    const order = await Store.getOrderById(orderId);
     if (!order) {
       container.innerHTML = `
         <div class="empty-state">
@@ -26,10 +26,21 @@
       <div class="empty-state">
         <span class="badge">Sipariş alındı</span>
         <h1>${order.number}</h1>
-        <p class="muted">Siparişiniz oluşturuldu. Admin panelindeki siparişler ekranından takip edilebilir.</p>
+        <p class="muted">Siparişiniz başarıyla alındı. Sipariş ve teslimat ayrıntıları için sizinle iletişime geçeceğiz.</p>
         <div class="summary-row" style="width:min(420px,100%)">
-          <span>Ödeme</span>
-          <strong>${Utils.escapeHTML(order.paymentMethod || "Kapıda ödeme")}</strong>
+          <span>Ödeme durumu</span>
+          <strong>Henüz ödeme alınmadı</strong>
+        </div>
+        <div class="order-success-items" style="width:min(520px,100%)">
+          <h2>Sipariş özeti</h2>
+          ${(order.items || [])
+            .map(
+              (item) => `<div class="summary-row">
+                <span>${Utils.escapeHTML(item.name)}${item.colorName ? ` · ${Utils.escapeHTML(item.colorName)}` : ""} × ${item.quantity}</span>
+                <strong>${Utils.money(item.price * item.quantity)}</strong>
+              </div>`
+            )
+            .join("")}
         </div>
         ${
           trackingVisible
@@ -45,7 +56,6 @@
         </div>
         <div class="cluster">
           <a class="btn btn-primary" href="${Utils.pagePath("products.html")}">Alışverişe devam et</a>
-          <a class="btn btn-outline" href="${Utils.adminPath("orders.html")}">Admin siparişleri</a>
         </div>
       </div>
     `;

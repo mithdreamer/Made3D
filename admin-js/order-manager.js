@@ -97,11 +97,11 @@
     return template;
   };
 
-  const renderOrdersTable = () => {
+  const renderOrdersTable = async () => {
     const body = document.querySelector("#ordersTableBody");
     const count = document.querySelector("#ordersCount");
     if (!body) return;
-    const orders = Store.getOrders();
+    const orders = await Store.getOrders();
     if (count) count.textContent = `${orders.length} sipariş`;
     body.innerHTML = orders.length
       ? orders
@@ -110,6 +110,9 @@
               <tr>
                 <td><strong>${order.number}</strong><div class="muted">${Utils.formatDate(order.createdAt)}</div></td>
                 <td>${Utils.escapeHTML(order.customer.name)}<div class="muted">${Utils.escapeHTML(order.customer.phone)}</div></td>
+                <td>${order.items
+                  .map((item) => `${Utils.escapeHTML(item.name)}${item.colorName ? `<div class="muted">Renk: ${Utils.escapeHTML(item.colorName)}</div>` : ""}`)
+                  .join("<br>")}</td>
                 <td>${Utils.money(order.total)}</td>
                 <td>
                   <span class="badge ${paymentStatusClass(order.paymentStatus)}">${paymentStatusLabel(order.paymentStatus)}</span>
@@ -127,13 +130,13 @@
             `
           )
           .join("")
-      : `<tr><td colspan="7"><div class="empty-state"><h2>Sipariş yok</h2><p class="muted">Ödeme formu tamamlandığında sipariş burada görünür.</p></div></td></tr>`;
+      : `<tr><td colspan="8"><div class="empty-state"><h2>Sipariş yok</h2><p class="muted">Ziyaretçi sipariş oluşturduğunda burada görünür.</p></div></td></tr>`;
   };
 
-  const renderOrderDetail = () => {
+  const renderOrderDetail = async () => {
     const container = document.querySelector("#orderDetail");
     if (!container) return;
-    const order = Store.getOrderById(Utils.getParam("id"));
+    const order = await Store.getOrderById(Utils.getParam("id"));
     if (!order) {
       container.innerHTML = `<div class="empty-state"><h1>Sipariş bulunamadı</h1><a class="btn btn-primary" href="${Utils.adminPath("orders.html")}">Siparişlere dön</a></div>`;
       return;
@@ -159,7 +162,7 @@
           <h2>Müşteri</h2>
           <p><strong>${Utils.escapeHTML(order.customer.name)}</strong></p>
           <p class="muted">${Utils.escapeHTML(order.customer.email)}<br>${Utils.escapeHTML(order.customer.phone)}</p>
-          <p>${Utils.escapeHTML(order.customer.address)}<br>${Utils.escapeHTML(order.customer.city)}</p>
+          <p>${Utils.escapeHTML(order.customer.address)}<br>${Utils.escapeHTML(order.customer.district || "")} / ${Utils.escapeHTML(order.customer.city)}</p>
         </section>
 
         <form class="admin-card stack-sm" data-order-payment-form="${order.id}">
@@ -230,7 +233,7 @@
               .map(
                 (item) => `
                   <tr>
-                    <td>${Utils.escapeHTML(item.name)}</td>
+                    <td>${Utils.escapeHTML(item.name)}${item.colorName ? `<div class="muted"><strong>Renk:</strong> ${Utils.escapeHTML(item.colorName)}</div>` : ""}</td>
                     <td>${item.quantity}</td>
                     <td>${Utils.money(item.price)}</td>
                     <td>${Utils.money(item.price * item.quantity)}</td>
@@ -244,31 +247,31 @@
     `;
   };
 
-  document.addEventListener("change", (event) => {
+  document.addEventListener("change", async (event) => {
     if (!event.target.matches("[data-order-status]")) return;
-    Store.updateOrderStatus(event.target.dataset.orderStatus, event.target.value);
-    renderOrdersTable();
-    renderOrderDetail();
+    await Store.updateOrderStatus(event.target.dataset.orderStatus, event.target.value);
+    await renderOrdersTable();
+    await renderOrderDetail();
     Utils.showToast("Sipariş durumu güncellendi.");
   });
 
-  document.addEventListener("submit", (event) => {
+  document.addEventListener("submit", async (event) => {
     const paymentForm = event.target.closest("[data-order-payment-form]");
     if (!paymentForm) return;
     event.preventDefault();
     const data = new FormData(paymentForm);
-    Store.updateOrderPayment(paymentForm.dataset.orderPaymentForm, {
+    await Store.updateOrderPayment(paymentForm.dataset.orderPaymentForm, {
       paymentStatus: data.get("paymentStatus"),
       paymentMethod: data.get("paymentMethod"),
       paymentProvider: data.get("paymentProvider"),
       transactionId: data.get("transactionId")
     });
-    renderOrdersTable();
-    renderOrderDetail();
+    await renderOrdersTable();
+    await renderOrderDetail();
     Utils.showToast("Ödeme bilgisi kaydedildi.");
   });
 
-  document.addEventListener("submit", (event) => {
+  document.addEventListener("submit", async (event) => {
     const shippingForm = event.target.closest("[data-order-shipping-form]");
     if (!shippingForm) return;
     event.preventDefault();
@@ -282,14 +285,14 @@
       return;
     }
 
-    Store.updateOrderShipping(shippingForm.dataset.orderShippingForm, {
+    await Store.updateOrderShipping(shippingForm.dataset.orderShippingForm, {
       cargoCompany: data.get("cargoCompany"),
       shipmentStatus,
       trackingNumber,
       trackingUrl: buildTrackingUrl(data.get("cargoCompany"), trackingNumber, String(data.get("trackingUrl") || "").trim())
     });
-    renderOrdersTable();
-    renderOrderDetail();
+    await renderOrdersTable();
+    await renderOrderDetail();
     Utils.showToast("Kargo bilgisi kaydedildi.");
   });
 

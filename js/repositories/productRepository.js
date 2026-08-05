@@ -137,6 +137,26 @@
     return data ? mapDatabaseProduct(data, includeInactive) : null;
   };
 
+  const getProductBySku = async (sku, options = {}) => {
+    const normalizedSku = String(sku || "").trim();
+    if (!normalizedSku) return null;
+
+    const includeInactive = options.includeInactive === true;
+    const source = includeInactive ? "products" : "storefront_products";
+    const { data, error } = await getClient()
+      .from(source)
+      .select("*")
+      .eq("product_code", normalizedSku)
+      .maybeSingle();
+
+    if (error) {
+      logSupabaseError("Ürün kodu Supabase'den kontrol edilemedi:", error);
+      throw new Error("Ürün kodu kontrol edilirken bir hata oluştu.");
+    }
+
+    return data ? mapDatabaseProduct(data, includeInactive) : null;
+  };
+
   const upsertProduct = async (product) => {
     if (!product?.name?.trim()) {
       throw new Error("Ürün adı zorunludur.");
@@ -160,7 +180,31 @@
 
     if (error) {
       logSupabaseError("Ürün Supabase'e kaydedilemedi:", error);
-      throw new Error("Ürün kaydedilirken bir hata oluştu.");
+      if (error.code === "23505") {
+        const constraintText = `${error.message || ""} ${error.details || ""}`.toLowerCase();
+        if (constraintText.includes("product_code")) {
+          const duplicateError = new Error(
+            "Bu ürün kodu başka bir üründe kullanılıyor. Mevcut ürünü düzenleyin veya farklı bir ürün kodu girin."
+          );
+          duplicateError.code = error.code;
+          duplicateError.field = "sku";
+          throw duplicateError;
+        }
+        if (constraintText.includes("slug")) {
+          const duplicateError = new Error(
+            "Bu ürün adıyla oluşan bağlantı adresi zaten kullanılıyor. Mevcut ürünü düzenleyin veya ürün adını değiştirin."
+          );
+          duplicateError.code = error.code;
+          duplicateError.field = "name";
+          throw duplicateError;
+        }
+        const duplicateError = new Error(
+          "Aynı benzersiz bilgiye sahip bir ürün zaten kayıtlı. Ürün listesinden mevcut kaydı düzenleyin."
+        );
+        duplicateError.code = error.code;
+        throw duplicateError;
+      }
+      throw new Error(error.message || "Ürün kaydedilirken bir hata oluştu.");
     }
 
     return mapDatabaseProduct(data, true);
@@ -234,6 +278,7 @@
     getProducts,
     getProductById,
     getProductBySlug,
+    getProductBySku,
     upsertProduct,
     deleteProduct,
     updateStock

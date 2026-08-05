@@ -5,7 +5,7 @@
     if (!metrics) return;
     const products = await Store.getProducts({ includeInactive: true });
     const activeProducts = products.filter((product) => product.active !== false);
-    const orders = Store.getOrders();
+    const orders = await Store.getOrders();
     const revenue = orders.reduce((sum, order) => sum + order.total, 0);
 
     metrics.innerHTML = `
@@ -116,8 +116,8 @@
       CategoryManager.bindCategoryForm();
     }
     if (page === "colors") await ColorManager.init();
-    if (page === "orders") OrderManager.renderOrdersTable();
-    if (page === "order-detail") OrderManager.renderOrderDetail();
+    if (page === "orders") await OrderManager.renderOrdersTable();
+    if (page === "order-detail") await OrderManager.renderOrderDetail();
     if (page === "settings") bindSettings();
     if (page === "payment-settings") PaymentManager.bindPaymentSettings();
     if (page === "shipping-settings") ShippingManager.bindShippingSettings();

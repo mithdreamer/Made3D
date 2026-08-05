@@ -18,7 +18,7 @@
   let categoryCache = [];
 
   const paymentDefaults = {
-    enabled: true,
+    enabled: false,
     activeProvider: "iyzico",
     mode: "test",
     methods: {
@@ -451,6 +451,17 @@
     return window.ProductRepository.getProductById(slug, options);
   };
 
+  const getProductBySku = async (sku, options = {}) => {
+    const normalizedSku = String(sku || "").trim();
+    if (!normalizedSku) return null;
+    if (!window.ProductRepository) {
+      return localProducts(options).find(
+        (product) => String(product.sku || "").trim() === normalizedSku
+      ) || null;
+    }
+    return window.ProductRepository.getProductBySku(normalizedSku, options);
+  };
+
   const upsertProduct = async (product) => {
     const repository = requireProductRepository();
     if (!product?.name?.trim()) throw new Error("Urun adi zorunludur.");
@@ -540,27 +551,48 @@
     if (quantity > stock) throw new Error(`Stok yetersiz. En fazla ${stock} adet ekleyebilirsiniz.`);
   };
 
-  const addToCart = async (productId, quantity = 1) => {
+  const addToCart = async (productId, quantity = 1, options = {}) => {
     const nextQuantity = Math.max(1, Number(quantity) || 1);
     const product = await getProductById(productId);
     ensureProductCanBePurchased(product, nextQuantity);
 
+    const assignedColors = await getProductColors(productId);
+    const activeColors = assignedColors.filter((row) => row.color_master?.is_active === true);
+    const selectedColor = activeColors.find((row) => row.color_code === options.colorCode);
+
+    if (assignedColors.length && !activeColors.length) {
+      throw new Error("Bu urunun renk secenekleri su anda satisa kapali.");
+    }
+    if (activeColors.length && !selectedColor) {
+      throw new Error("Lutfen urun detay sayfasindan bir renk secin.");
+    }
+
     const cart = getCart();
-    const line = cart.find((item) => item.productId === productId);
+    const colorCode = selectedColor?.color_code || "";
+    const colorName = selectedColor
+      ? selectedColor.color_master?.name_tr || selectedColor.color_master?.name_en || colorCode
+      : "";
+    const line = cart.find((item) => item.productId === productId && (item.variantId || "") === colorCode);
     const currentQuantity = Number(line?.quantity) || 0;
     const totalQuantity = currentQuantity + nextQuantity;
     ensureProductCanBePurchased(product, totalQuantity);
 
     if (line) line.quantity = totalQuantity;
-    else cart.push({ productId, quantity: nextQuantity });
+    else cart.push({
+      productId,
+      quantity: nextQuantity,
+      variantId: colorCode || undefined,
+      variant: colorName || undefined
+    });
     return setCart(cart);
   };
 
-  const removeFromCart = (productId) => setCart(getCart().filter((line) => line.productId !== productId));
+  const removeFromCart = (productId, variantId = "") =>
+    setCart(getCart().filter((line) => !(line.productId === productId && (line.variantId || "") === variantId)));
   const removeCartItem = removeFromCart;
   const clearCart = () => setCart([]);
 
-  const updateCartItem = async (productId, quantity) => {
+  const updateCartItem = async (productId, quantity, variantId = "") => {
     const nextQuantity = Number(quantity);
     if (nextQuantity <= 0) return removeFromCart(productId);
 
@@ -568,8 +600,32 @@
     ensureProductCanBePurchased(product, nextQuantity);
 
     const cart = getCart().map((line) =>
-      line.productId === productId ? { ...line, quantity: nextQuantity } : line
+      line.productId === productId && (line.variantId || "") === variantId
+        ? { ...line, quantity: nextQuantity }
+        : line
     );
+    return setCart(cart);
+  };
+
+  const editCartItem = async (productId, currentVariantId = "", changes = {}) => {
+    const nextQuantity = Math.max(1, Number(changes.quantity) || 1);
+    const product = await getProductById(productId);
+    ensureProductCanBePurchased(product, nextQuantity);
+    const assignedColors = await getProductColors(productId);
+    const activeColors = assignedColors.filter((row) => row.color_master?.is_active === true);
+    const requestedVariantId = String(changes.variantId || "");
+    const selectedColor = activeColors.find((row) => row.color_code === requestedVariantId);
+    if (assignedColors.length && !activeColors.length) throw new Error("Bu urunun renk secenekleri su anda satisa kapali.");
+    if (activeColors.length && !selectedColor) throw new Error("Lutfen gecerli bir renk secin.");
+    const cart = getCart();
+    const sourceIndex = cart.findIndex((line) => line.productId === productId && (line.variantId || "") === currentVariantId);
+    if (sourceIndex < 0) throw new Error("Duzenlenecek sepet urunu bulunamadi.");
+    const nextVariantId = selectedColor?.color_code || "";
+    const targetIndex = cart.findIndex((line, index) => index !== sourceIndex && line.productId === productId && (line.variantId || "") === nextVariantId);
+    const mergedQuantity = nextQuantity + (targetIndex >= 0 ? Number(cart[targetIndex].quantity) || 0 : 0);
+    ensureProductCanBePurchased(product, mergedQuantity);
+    const nextLine = { productId, quantity: mergedQuantity, variantId: nextVariantId || undefined, variant: selectedColor ? selectedColor.color_master?.name_tr || selectedColor.color_master?.name_en || nextVariantId : undefined };
+    if (targetIndex >= 0) { cart[targetIndex] = nextLine; cart.splice(sourceIndex, 1); } else { cart[sourceIndex] = nextLine; }
     return setCart(cart);
   };
 
@@ -609,43 +665,62 @@
     return { subtotal, shipping, total: subtotal + shipping };
   };
 
-  const getOrders = () =>
-    read(KEYS.orders, seed().orders || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const requireOrderRepository = () => {
+    if (!window.OrderRepository) throw new Error("Siparis servisi yuklenemedi.");
+    return window.OrderRepository;
+  };
+
+  const getOrders = async () => requireOrderRepository().getOrders();
 
   const saveOrders = (orders) => write(KEYS.orders, orders);
 
-  const getOrderById = (orderId) =>
-    getOrders().find((order) => order.id === orderId || order.number === orderId);
+  const getOrderById = async (orderId) => {
+    const localOrder = read(KEYS.orders, []).find((order) => order.id === orderId || order.number === orderId);
+    return localOrder || requireOrderRepository().getOrderById(orderId);
+  };
 
-  const createOrder = async ({ customer, paymentMethod, note }) => {
+  const createOrder = async ({ customer, note }) => {
     const cartItems = await getCartItems();
     if (!cartItems.length) throw new Error("Sepet bos.");
 
     cartItems.forEach((item) => ensureProductCanBePurchased(item, item.quantity));
 
+    for (const item of cartItems) {
+      const assignedColors = await getProductColors(item.productId);
+      if (!assignedColors.length) continue;
+      const selectedColor = assignedColors.find(
+        (row) => row.color_code === item.variantId && row.color_master?.is_active === true
+      );
+      if (!selectedColor) {
+        throw new Error(`${item.name} icin gecerli bir renk secmelisiniz.`);
+      }
+      item.variant =
+        selectedColor.color_master?.name_tr ||
+        selectedColor.color_master?.name_en ||
+        selectedColor.color_code;
+    }
+
     const totals = calculateCart(cartItems);
-    const orders = getOrders();
-    const paymentSettings = getPaymentSettings();
-    const selectedPaymentMethod = paymentMethod || "Kapida odeme";
-    const isCardPayment = selectedPaymentMethod.toLocaleLowerCase("tr-TR").includes("kredi kart");
     const now = new Date();
     const order = {
       id: makeId("ord"),
-      number: `MAde-${now.getFullYear()}-${String(orders.length + 1).padStart(4, "0")}`,
+      number: `MAde-${now.getFullYear()}-${String(Date.now()).slice(-8)}`,
       customer,
       items: cartItems.map((item) => ({
         productId: item.productId,
         name: item.name,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
+        colorCode: item.variantId || "",
+        colorName: item.variant || ""
       })),
       subtotal: totals.subtotal,
       shipping: totals.shipping,
       total: totals.total,
       status: "new",
-      paymentMethod: selectedPaymentMethod,
-      paymentStatus: isCardPayment ? "paid" : "pending",
-      paymentProvider: isCardPayment ? paymentSettings.activeProvider : "manual",
+      paymentMethod: window.AppConfig?.get("PAYMENTS_ENABLED") ? "Ödeme yöntemi daha sonra seçilecek" : "Henüz ödeme alınmadı",
+      paymentStatus: "pending",
+      paymentProvider: "manual",
       transactionId: "",
       cargoCompany: "",
       trackingNumber: "",
@@ -666,54 +741,21 @@
       }
     }
 
-    saveOrders([order, ...orders]);
+    await requireOrderRepository().createOrder(order);
+    saveOrders([order]);
     clearCart();
     await getProducts({ includeInactive: true });
     return order;
   };
 
-  const updateOrderStatus = (orderId, status) => {
-    const orders = getOrders().map((order) =>
-      order.id === orderId ? { ...order, status, updatedAt: new Date().toISOString() } : order
-    );
-    saveOrders(orders);
-    return getOrderById(orderId);
-  };
+  const updateOrderStatus = async (orderId, status) =>
+    requireOrderRepository().updateOrder(orderId, { status });
 
-  const updateOrderPayment = (orderId, payment) => {
-    const orders = getOrders().map((order) =>
-      order.id === orderId
-        ? {
-            ...order,
-            paymentMethod: payment.paymentMethod ?? order.paymentMethod,
-            paymentStatus: payment.paymentStatus ?? order.paymentStatus ?? "pending",
-            paymentProvider: payment.paymentProvider ?? order.paymentProvider ?? "manual",
-            transactionId: payment.transactionId ?? order.transactionId ?? "",
-            updatedAt: new Date().toISOString()
-          }
-        : order
-    );
-    saveOrders(orders);
-    return getOrderById(orderId);
-  };
+  const updateOrderPayment = async (orderId, payment) =>
+    requireOrderRepository().updateOrder(orderId, payment);
 
-  const updateOrderShipping = (orderId, shipping) => {
-    const orders = getOrders().map((order) =>
-      order.id === orderId
-        ? {
-            ...order,
-            cargoCompany: shipping.cargoCompany ?? order.cargoCompany ?? "",
-            trackingNumber: shipping.trackingNumber ?? order.trackingNumber ?? "",
-            trackingUrl: shipping.trackingUrl ?? order.trackingUrl ?? "",
-            shipmentStatus: shipping.shipmentStatus ?? order.shipmentStatus ?? "pending",
-            status: shipping.shipmentStatus === "shipped" ? "shipped" : order.status,
-            updatedAt: new Date().toISOString()
-          }
-        : order
-    );
-    saveOrders(orders);
-    return getOrderById(orderId);
-  };
+  const updateOrderShipping = async (orderId, shipping) =>
+    requireOrderRepository().updateOrder(orderId, shipping);
 
   const resetDemo = () => {
     const data = seed();
@@ -730,7 +772,7 @@
     shippingSettings: getShippingSettings(),
     categories: await getCategories({ includeInactive: true }),
     products: await getProducts({ includeInactive: true }),
-    orders: getOrders()
+    orders: await getOrders()
   });
 
   init();
@@ -769,10 +811,12 @@
     replaceProductColors,
     getProductById,
     getProductBySlug,
+    getProductBySku,
     getCart,
     setCart,
     addToCart,
     updateCartItem,
+    editCartItem,
     removeFromCart,
     removeCartItem,
     clearCart,

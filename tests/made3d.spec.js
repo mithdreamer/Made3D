@@ -192,14 +192,16 @@ test("MAde3D storefront and admin demo flow", async ({ page }) => {
 
   await page.goto("http://localhost:8080/pages/cart.html");
   await expect(page.locator(".cart-item")).toHaveCount(1);
-  await page.getByRole("link", { name: /Ödemeye geç/i }).click();
+  await page.getByRole("link", { name: /Sipariş bilgilerine geç/i }).click();
 
   await page.getByLabel("Ad Soyad").fill("Test Müşteri");
   await page.getByLabel("Telefon").fill("+90 555 000 00 00");
   await page.getByLabel("E-posta").fill("test@example.com");
   await page.getByLabel("Şehir").fill("İstanbul");
+  await page.getByLabel("İlçe").fill("Kadıköy");
   await page.getByLabel("Adres").fill("Test adresi");
   await page.getByLabel("Sipariş notu").fill("Mat turkuaz renk tercih edilir.");
+  await page.getByLabel(/Teslimat bilgilerimi/).check();
   await page.getByRole("button", { name: /Siparişi oluştur/i }).click();
   await expect(page).toHaveURL(/order-success\.html\?order=/);
   await expect(page.getByText(/MAde-2026-/)).toBeVisible();

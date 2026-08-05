@@ -17,6 +17,7 @@
     MEDIA_BUCKET_NAME: "made3d-media",
     MEDIA_STORAGE_PROVIDER: "cloudflare_r2",
     REMOTE_STORE_URL: "",
+    PAYMENTS_ENABLED: false,
     MAX_PRODUCT_IMAGES: 6,
     MAX_IMAGE_BYTES: 10 * 1024 * 1024,
     ALLOWED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/webp", "image/avif"]

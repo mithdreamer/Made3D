@@ -214,6 +214,81 @@
   align-items: start;
 }
 
+.product-color-picker {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.product-color-picker legend {
+  padding: 0 0.35rem;
+  font-weight: 800;
+}
+
+.product-color-selection {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.product-color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.product-color-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 42px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.product-color-option:has(input:checked) {
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 2px rgba(22, 32, 34, 0.12);
+}
+
+.product-color-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.product-color-option:has(input:focus-visible) {
+  outline: 3px solid rgba(14, 143, 138, 0.3);
+  outline-offset: 2px;
+}
+
+.product-color-swatch {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  border: 1px solid rgba(22, 32, 34, 0.24);
+  border-radius: 50%;
+  background: var(--product-color);
+}
+
+.product-color-unavailable {
+  padding: 0.85rem 1rem;
+  border: 1px solid #e7c87b;
+  border-radius: var(--radius);
+  background: #fff7df;
+  color: #74540b;
+  font-weight: 700;
+}
+
 .product-gallery {
   display: grid;
   gap: 0.75rem;

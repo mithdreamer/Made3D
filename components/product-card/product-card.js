@@ -21,7 +21,7 @@
               <strong class="price">${Utils.money(product.price)}</strong>
               ${discount ? `<span class="old-price">${Utils.money(product.oldPrice)}</span>` : ""}
             </div>
-            <button class="icon-btn btn-primary" type="button" data-add-to-cart="${product.id}" title="Sepete ekle" aria-label="Sepete ekle" ${product.stock <= 0 ? "disabled" : ""}>
+            <button class="icon-btn btn-primary" type="button" data-add-to-cart="${product.id}" data-product-stock="${Number(product.stock) || 0}" data-product-url="${Utils.productPath(product)}" title="Sepete ekle" aria-label="Sepete ekle">
               +
             </button>
           </div>

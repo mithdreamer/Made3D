@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ödeme | MAde3D</title>
+    <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
+    <title>Siparişi Tamamla | MAde3D</title>
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../components/navbar/navbar.css">
     <link rel="stylesheet" href="../components/footer/footer.css">
@@ -13,45 +14,49 @@
     <div data-component="navbar"></div>
     <main class="container" id="checkoutContent">
       <header class="page-header">
-        <h1>Ödeme</h1>
-        <p>Sipariş bilgileri bu demo sürümde tarayıcınızda saklanır.</p>
+        <h1>Siparişi tamamla</h1>
+        <p>Teslimat ve iletişim bilgilerinizi girin. Bu aşamada çevrim içi ödeme alınmayacaktır.</p>
       </header>
       <section class="checkout-layout">
         <form class="form-card" id="checkoutForm">
           <div class="form-grid">
             <div class="field">
               <label for="name">Ad Soyad</label>
-              <input id="name" name="name" required>
+              <input id="name" name="name" autocomplete="name" required>
             </div>
             <div class="field">
               <label for="phone">Telefon</label>
-              <input id="phone" name="phone" required>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" required>
             </div>
             <div class="field">
               <label for="email">E-posta</label>
-              <input id="email" name="email" type="email" required>
+              <input id="email" name="email" type="email" autocomplete="email" required>
             </div>
             <div class="field">
               <label for="city">Şehir</label>
-              <input id="city" name="city" required>
+              <input id="city" name="city" autocomplete="address-level1" required>
+            </div>
+            <div class="field">
+              <label for="district">İlçe</label>
+              <input id="district" name="district" autocomplete="address-level2" required>
             </div>
             <div class="field full-span">
               <label for="address">Adres</label>
-              <textarea id="address" name="address" required></textarea>
-            </div>
-            <div class="field">
-              <label for="paymentMethod">Ödeme yöntemi</label>
-              <select id="paymentMethod" name="paymentMethod">
-                <option>Kapıda ödeme</option>
-                <option>Havale/EFT</option>
-                <option>Kredi kartı simülasyonu</option>
-              </select>
+              <textarea id="address" name="address" autocomplete="street-address" required></textarea>
             </div>
             <div class="field full-span">
               <label for="note">Sipariş notu</label>
-              <textarea id="note" name="note" placeholder="Renk, ölçü veya özel üretim notunuzu yazın"></textarea>
+              <textarea id="note" name="note" placeholder="Ölçü veya özel üretim talebiniz varsa yazın. Seçtiğiniz renk sipariş özetinde gösterilir."></textarea>
             </div>
+            <label class="checkout-confirmation full-span">
+              <input type="checkbox" name="orderConfirmed" required>
+              <span>Teslimat bilgilerimi ve sipariş özetindeki ürün, renk, adet ve toplam tutarı kontrol ettim.</span>
+            </label>
           </div>
+          <div class="checkout-notice" role="note">
+            Siparişinizi oluşturduğunuzda ödeme alınmaz. Sipariş ve teslimat ayrıntıları için sizinle iletişime geçilecektir.
+          </div>
+          <p class="form-error" data-checkout-message role="alert" tabindex="-1" hidden></p>
           <button class="btn btn-primary" type="submit">Siparişi oluştur</button>
         </form>
         <aside class="checkout-summary stack">
@@ -70,6 +75,8 @@
     <script src="../js/repositories/productRepository.js"></script>
     <script src="../js/repositories/productImageRepository.js"></script>
     <script src="../js/repositories/categoryRepository.js"></script>
+    <script src="../js/repositories/productColorRepository.js"></script>
+    <script src="../js/repositories/orderRepository.js"></script>
     <script src="../js/storage.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/payment.js"></script>

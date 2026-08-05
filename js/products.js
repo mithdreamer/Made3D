@@ -73,8 +73,6 @@
 
       if (statsContainer) {
         const categories = await Store.getCategories();
-        const orders = Store.getOrders();
-
         statsContainer.innerHTML = `
           <div class="admin-card metric">
             <span class="muted">Aktif ürün</span>
@@ -87,8 +85,8 @@
           </div>
 
           <div class="admin-card metric">
-            <span class="muted">Demo sipariş</span>
-            <strong>${orders.length}</strong>
+            <span class="muted">Sipariş yönetimi</span>
+            <strong>Admin</strong>
           </div>
         `;
       }
@@ -279,6 +277,30 @@
         console.warn("Urun galerisi yuklenemedi:", error);
       }
 
+      let productColorRows = [];
+      try {
+        productColorRows = await Store.getProductColors(product.id);
+      } catch (error) {
+        console.warn("Urun renkleri yuklenemedi:", error);
+      }
+
+      const activeProductColors = productColorRows
+        .filter((row) => row.color_master?.is_active === true)
+        .map((row) => ({
+          code: row.color_code,
+          name: row.color_master.name_tr || row.color_master.name_en || row.color_code,
+          hexCode: row.color_master.hex_code || "#d9d9d9",
+          isPrimary: Boolean(row.is_primary)
+        }));
+
+      const defaultColor =
+        activeProductColors.find((color) => color.isPrimary) ||
+        activeProductColors[0] ||
+        null;
+
+      const hasColorAssignments = productColorRows.length > 0;
+      const hasPurchasableColor = activeProductColors.length > 0;
+
       const images = galleryImages.length
         ? galleryImages.map((image) => Utils.imageUrl(image.src || image.objectKey))
         : product.images?.length > 0
@@ -365,13 +387,58 @@
             )}
           </p>
 
+          ${
+            hasPurchasableColor
+              ? `
+                <fieldset class="product-color-picker" data-product-color-picker>
+                  <legend>Renk seçimi</legend>
+                  <p class="product-color-selection">
+                    Seçili renk:
+                    <strong data-selected-color-name>${Utils.escapeHTML(defaultColor.name)}</strong>
+                  </p>
+                  <p class="muted">Siparişe devam etmek için aşağıdaki renklerden birini seçmelisiniz.</p>
+                  <div class="product-color-options">
+                    ${activeProductColors
+                      .map(
+                        (color) => `
+                          <label class="product-color-option" title="${Utils.escapeHTML(color.name)}">
+                            <input
+                              type="radio"
+                              name="product-color"
+                              value="${Utils.escapeHTML(color.code)}"
+                              data-color-name="${Utils.escapeHTML(color.name)}"
+                              ${color.code === defaultColor.code ? "checked" : ""}
+                            >
+                            <span
+                              class="product-color-swatch"
+                              style="--product-color: ${Utils.escapeHTML(color.hexCode)}"
+                              aria-hidden="true"
+                            ></span>
+                            <span>${Utils.escapeHTML(color.name)}</span>
+                          </label>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                </fieldset>
+              `
+              : hasColorAssignments
+                ? `
+                  <div class="product-color-unavailable" role="status">
+                    Bu ürünün renk seçenekleri şu anda satışa kapalıdır.
+                  </div>
+                `
+                : ""
+          }
+
           <div class="cluster">
             <button
               class="btn btn-primary"
               type="button"
               data-add-to-cart="${product.id}"
               ${
-                product.stock <= 0
+                product.stock <= 0 ||
+                (hasColorAssignments && !hasPurchasableColor)
                   ? "disabled"
                   : ""
               }
@@ -417,6 +484,20 @@
               thumb.classList.add("is-active");
             }
           );
+        });
+
+      container
+        .querySelectorAll('input[name="product-color"]')
+        .forEach((input) => {
+          input.addEventListener("change", () => {
+            const selectedName = container.querySelector(
+              "[data-selected-color-name]"
+            );
+
+            if (selectedName && input.checked) {
+              selectedName.textContent = input.dataset.colorName || input.value;
+            }
+          });
         });
     } catch (error) {
       console.error(

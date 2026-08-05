@@ -15,7 +15,7 @@
       <div class="summary-row total"><span>Genel toplam</span><strong>${Utils.money(totals.total)}</strong></div>
       ${
         options.checkout
-          ? `<a class="btn btn-primary" href="${Utils.pagePath("checkout.html")}">Ödemeye geç</a>`
+          ? `<a class="btn btn-primary" href="${Utils.pagePath("checkout.html")}">Sipariş bilgilerine geç</a>`
           : ""
       }
     `;
@@ -51,21 +51,49 @@
         return;
       }
 
-      list.innerHTML = items
+      const editableItems = await Promise.all(items.map(async (item) => {
+        try {
+          return {
+            ...item,
+            colorOptions: (await Store.getProductColors(item.productId))
+              .filter((row) => row.color_master?.is_active === true),
+            colorOptionsAvailable: true
+          };
+        } catch (error) {
+          console.error(`${item.name} renk seçenekleri yüklenemedi:`, error);
+          return {
+            ...item,
+            colorOptions: [],
+            colorOptionsAvailable: false
+          };
+        }
+      }));
+      list.innerHTML = editableItems
         .map(
           (item) => `
-            <article class="cart-item">
+            <article class="cart-item" data-cart-line="${item.productId}" data-cart-line-color="${Utils.escapeHTML(item.variantId || "")}">
               <img src="${Utils.imageUrl(item.image)}" alt="${Utils.escapeHTML(item.name)}">
               <div>
                 <h3><a href="${Utils.pagePath("product-detail.html")}?slug=${item.slug}">${Utils.escapeHTML(item.name)}</a></h3>
                 <p class="muted">${Utils.money(item.price)} x ${item.quantity}</p>
+                ${item.variant ? `<p class="muted"><strong>Renk:</strong> ${Utils.escapeHTML(item.variant)}</p>` : ""}
                 ${item.active ? "" : `<p class="muted">Bu ürün şu anda satış için aktif değil.</p>`}
               </div>
               <div class="cart-line-actions stack-sm">
-                <label class="sr-only" for="qty-${item.productId}">Adet</label>
-                <input id="qty-${item.productId}" type="number" min="1" max="${item.stock}" value="${item.quantity}" data-cart-qty="${item.productId}">
-                <button class="btn btn-outline" type="button" data-remove-cart="${item.productId}">Kaldır</button>
+                <button class="btn btn-outline" type="button" data-edit-cart ${item.colorOptionsAvailable ? "" : "disabled"}>Düzenle</button>
+                <button class="btn btn-outline" type="button" data-remove-cart="${item.productId}" data-cart-color="${Utils.escapeHTML(item.variantId || "")}">Kaldır</button>
               </div>
+              ${item.colorOptionsAvailable ? "" : `<p class="cart-edit-warning" role="status">Renk seçenekleri şu anda yüklenemedi. Sepeti görüntüleyebilir veya ürünü kaldırabilirsiniz; düzenlemek için sayfayı yenileyin.</p>`}
+              <form class="cart-edit-form" data-cart-edit-form hidden>
+                <div class="cart-edit-fields">
+                  <label>Adet<input name="quantity" type="number" min="1" max="${item.stock}" value="${item.quantity}" required></label>
+                  ${item.colorOptions.length ? `<label>Renk<select name="variantId" required>${item.colorOptions.map((row) => {
+                    const name = row.color_master?.name_tr || row.color_master?.name_en || row.color_code;
+                    return `<option value="${Utils.escapeHTML(row.color_code)}" ${row.color_code === item.variantId ? "selected" : ""}>${Utils.escapeHTML(name)}</option>`;
+                  }).join("")}</select></label>` : `<input name="variantId" type="hidden" value="${Utils.escapeHTML(item.variantId || "")}">`}
+                </div>
+                <div class="cart-edit-buttons"><button class="btn btn-primary" type="submit">Değişiklikleri kaydet</button><button class="btn btn-outline" type="button" data-cancel-cart-edit>Vazgeç</button></div>
+              </form>
             </article>
           `
         )
@@ -89,7 +117,7 @@
       if (!items.length) {
         document.querySelector("#checkoutContent").innerHTML = `
           <div class="empty-state">
-            <h2>Ödeme için ürün bulunamadı</h2>
+            <h2>Sipariş için ürün bulunamadı</h2>
             <p class="muted">Sepetinize ürün ekleyerek yeniden deneyin.</p>
             <a class="btn btn-primary" href="${Utils.pagePath("products.html")}">Ürünlere git</a>
           </div>
@@ -103,7 +131,7 @@
             .map(
               (item) => `
                 <li>
-                  <span>${Utils.escapeHTML(item.name)} x ${item.quantity}</span>
+                  <span>${Utils.escapeHTML(item.name)}${item.variant ? ` (${Utils.escapeHTML(item.variant)})` : ""} x ${item.quantity}</span>
                   <strong>${Utils.money(item.price * item.quantity)}</strong>
                 </li>
               `
@@ -112,12 +140,11 @@
         </ul>
       `;
       renderSummary(totalsBox, items);
-      window.Payment?.populateCheckoutMethods(form.elements.paymentMethod);
     } catch (error) {
-      console.error("Ödeme özeti yüklenemedi:", error);
+      console.error("Sipariş özeti yüklenemedi:", error);
       document.querySelector("#checkoutContent").innerHTML = `
         <div class="empty-state">
-          <h2>Ödeme özeti yüklenemedi</h2>
+          <h2>Sipariş özeti yüklenemedi</h2>
           <p class="muted">${Utils.escapeHTML(error.message || "Sepet bilgisi alınamadı.")}</p>
           <a class="btn btn-primary" href="${Utils.pagePath("cart.html")}">Sepete dön</a>
         </div>
@@ -127,7 +154,21 @@
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (form.dataset.submitting === "true") return;
+
       const data = new FormData(form);
+      const submitButton = form.querySelector('[type="submit"]');
+      const formMessage = form.querySelector("[data-checkout-message]");
+
+      form.dataset.submitting = "true";
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Sipariş oluşturuluyor...";
+      }
+      if (formMessage) {
+        formMessage.hidden = true;
+        formMessage.textContent = "";
+      }
 
       try {
         const order = await Store.createOrder({
@@ -136,16 +177,27 @@
             email: data.get("email"),
             phone: data.get("phone"),
             address: data.get("address"),
-            city: data.get("city")
+            city: data.get("city"),
+            district: data.get("district")
           },
-          paymentMethod: data.get("paymentMethod"),
           note: data.get("note")
         });
         updateCounters();
         window.location.href = `${Utils.pagePath("order-success.html")}?order=${encodeURIComponent(order.id)}`;
       } catch (error) {
         console.error("Sipariş oluşturulamadı:", error);
-        Utils.showToast(error.message || "Sipariş oluşturulamadı.");
+        const message = error.message || "Sipariş oluşturulamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.";
+        if (formMessage) {
+          formMessage.textContent = message;
+          formMessage.hidden = false;
+          formMessage.focus();
+        }
+        Utils.showToast(message);
+        form.dataset.submitting = "false";
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = "Siparişi oluştur";
+        }
       }
     });
   };
@@ -153,10 +205,18 @@
   document.addEventListener("click", async (event) => {
     const addButton = event.target.closest("[data-add-to-cart]");
     const removeButton = event.target.closest("[data-remove-cart]");
+    const editButton = event.target.closest("[data-edit-cart]");
+    const cancelEditButton = event.target.closest("[data-cancel-cart-edit]");
+    if (editButton) editButton.closest("[data-cart-line]").querySelector("[data-cart-edit-form]").hidden = false;
+    if (cancelEditButton) cancelEditButton.closest("[data-cart-line]").querySelector("[data-cart-edit-form]").hidden = true;
 
     if (addButton) {
       try {
-        await Store.addToCart(addButton.dataset.addToCart, 1);
+        const detail = addButton.closest("#productDetail");
+        const selectedColor = detail?.querySelector('input[name="product-color"]:checked');
+        await Store.addToCart(addButton.dataset.addToCart, 1, {
+          colorCode: selectedColor?.value || ""
+        });
         updateCounters();
         Utils.showToast("Ürün sepete eklendi.");
       } catch (error) {
@@ -165,22 +225,28 @@
     }
 
     if (removeButton) {
-      Store.removeFromCart(removeButton.dataset.removeCart);
+      Store.removeFromCart(removeButton.dataset.removeCart, removeButton.dataset.cartColor || "");
       updateCounters();
       await renderCartPage();
     }
   });
 
-  document.addEventListener("change", async (event) => {
-    if (!event.target.matches("[data-cart-qty]")) return;
-
+  document.addEventListener("submit", async (event) => {
+    if (!event.target.matches("[data-cart-edit-form]")) return;
+    event.preventDefault();
+    const form = event.target;
+    const line = form.closest("[data-cart-line]");
+    const data = new FormData(form);
+    const submitButton = form.querySelector('[type="submit"]');
     try {
-      await Store.updateCartItem(event.target.dataset.cartQty, event.target.value);
+      submitButton.disabled = true;
+      await Store.editCartItem(line.dataset.cartLine, line.dataset.cartLineColor || "", { quantity: data.get("quantity"), variantId: data.get("variantId") || "" });
       updateCounters();
       await renderCartPage();
+      Utils.showToast("Sepetiniz güncellendi.");
     } catch (error) {
       Utils.showToast(error.message || "Sepet güncellenemedi.");
-      await renderCartPage();
+      submitButton.disabled = false;
     }
   });
 
